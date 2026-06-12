@@ -1,0 +1,8 @@
+"clave_intervalo_ingreso_acreditado","intervalo_ingreso_acreditado"
+1,"(0 - 999)"
+2,"(1,000 - 10,000)"
+3,"(10,001 - 20,000)"
+4,"(20,001 - 40,000)"
+5,"(40,001 - 80,000)"
+6,"(80,001 - 150,000)"
+7,"Más de 150,000 MXN"
