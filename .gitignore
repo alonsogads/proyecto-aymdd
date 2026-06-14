@@ -1,3 +1,13 @@
 # Large CSV data files
-data/Base_Historica/Base_Historica/Base_Historica_Portafolio_Total.csv
-data/Base_Historica/Base_Historica/Base_Historica_Marginal.csv
+data/Base_Historica/Base_Historica/*
+data/Datos_Procesados/*
+
+# Placeholders
+!data/Base_Historica/Base_Historica/.gitkeep
+!data/Datos_Procesados/.gitkeep
+!diagrams/.gitkeep
+!docs/.gitkeep
+!models/.gitkeep
+!notebooks/.gitkeep
+!reports/.gitkeep
+!src/.gitkeep
