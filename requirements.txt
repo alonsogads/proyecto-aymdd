@@ -1,0 +1,18 @@
+# Entorno de trabajo y experimentación
+jupyter==1.0.0
+notebook==7.0.6
+
+# Manipulación y análisis de datos
+pandas==2.2.0
+numpy==1.26.4
+
+# Visualización
+matplotlib==3.8.2
+seaborn==0.13.2
+
+# Machine Learning y Preprocesamiento
+scikit-learn==1.4.0
+joblib==1.3.2
+
+# Deep Learning (Modelo Supervisado)
+torch==2.2.0
