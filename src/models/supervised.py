@@ -90,60 +90,58 @@ class RedNeuronalEstrategia(ModeloEstrategia):
         self.modelo = None # Se instanciara dinamicamente cuando conozcamos la dimension de X
         self.entrenado = False
 
-    def entrenar(self, X, y):
+    def entrenar(self, X, y, X_val=None, y_val=None):
         print("Preparando entorno PyTorch para entrenamiento de Red Neuronal Multicapa...")
         
-        # 1. Obtenemos las dimensiones para instanciar la arquitectura dinamicamente
         input_dim = X.shape[1]
         self.modelo = _ArquitecturaMLP(input_dim)
         
-        # 2. Conversion de datos numpy a Tensores de PyTorch
+        # Tensores de Entrenamiento
         X_tensor = torch.tensor(X, dtype=torch.float32)
-        y_tensor = torch.tensor(y, dtype=torch.float32).unsqueeze(1) # [batch_size, 1]
+        y_tensor = torch.tensor(y, dtype=torch.float32).unsqueeze(1)
         
-        # 3. Creacion de DataLoaders para procesar en lotes (batches)
+        # Tensores de Validacion (si se proveen)
+        if X_val is not None and y_val is not None:
+            X_val_tensor = torch.tensor(X_val, dtype=torch.float32)
+            y_val_tensor = torch.tensor(y_val, dtype=torch.float32).unsqueeze(1)
+        
         dataset = TensorDataset(X_tensor, y_tensor)
         dataloader = DataLoader(dataset, batch_size=self.batch_size, shuffle=True)
         
-        # 4. Calculo matematico para el desbalance de clases (Pesos en la funcion de perdida)
         num_negativos = (y == 0).sum()
         num_positivos = (y == 1).sum()
         peso_clase_positiva = torch.tensor([num_negativos / num_positivos], dtype=torch.float32)
         
-        # Definimos funcion de perdida y optimizador
-        # Usamos BCEWithLogitsLoss porque es mas estable numericamente que aplicar Sigmoide manual
         criterio = nn.BCEWithLogitsLoss(pos_weight=peso_clase_positiva)
         optimizador = optim.Adam(self.modelo.parameters(), lr=self.learning_rate)
         
-        # 5. Ciclo explicito de entrenamiento
-        self.modelo.train() # Ponemos la red en modo entrenamiento (activa Dropout y BatchNorm)
-        
         for epoca in range(self.epocas):
+            self.modelo.train()
             perdida_acumulada = 0.0
             
             for lote_X, lote_y in dataloader:
-                # Paso A: Reiniciar gradientes
                 optimizador.zero_grad()
-                
-                # Paso B: Pase hacia adelante (Forward pass)
                 predicciones_crudas = self.modelo(lote_X)
-                
-                # Paso C: Calculo del error (Loss)
                 perdida = criterio(predicciones_crudas, lote_y)
-                
-                # Paso D: Retropropagacion (Backward pass)
                 perdida.backward()
-                
-                # Paso E: Actualizacion de pesos
                 optimizador.step()
-                
                 perdida_acumulada += perdida.item()
                 
             perdida_promedio = perdida_acumulada / len(dataloader)
             
-            # Imprimimos el progreso cada 10 epocas para mantener la consola limpia
-            if (epoca + 1) % 10 == 0:
-                print(f" -> Epoca [{epoca+1}/{self.epocas}] - Perdida (Loss): {perdida_promedio:.4f}")
+            # Si tenemos datos de validacion, calculamos la perdida de validacion
+            if X_val is not None and y_val is not None:
+                self.modelo.eval()
+                with torch.no_grad():
+                    val_predicciones = self.modelo(X_val_tensor)
+                    val_perdida = criterio(val_predicciones, y_val_tensor).item()
+                    
+                # Imprimimos progreso cada 10 epocas o en la ultima epoca
+                if (epoca + 1) % 10 == 0 or (epoca + 1) == self.epocas:
+                    print(f" -> Epoca [{epoca+1}/{self.epocas}] - Loss Entrenamiento: {perdida_promedio:.4f} | Loss Validacion: {val_perdida:.4f}")
+            else:
+                if (epoca + 1) % 10 == 0 or (epoca + 1) == self.epocas:
+                    print(f" -> Epoca [{epoca+1}/{self.epocas}] - Loss Entrenamiento: {perdida_promedio:.4f}")
                 
         self.entrenado = True
         print("Entrenamiento de Red Neuronal completado.")

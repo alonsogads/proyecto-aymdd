@@ -30,25 +30,43 @@ class PamClusteringEstrategia(ModeloEstrategia):
         self.X_train_referencia = None
         self.indices_medoides = None
 
+    def _preparar_datos_gower(self, df):
+        """
+        Metodo auxiliar para evitar conflictos con versiones modernas de Pandas/Numpy.
+        Convierte los tipos 'StringDtype' a 'object' primitivo, y los numericos a 'float64',
+        que son los unicos que la libreria gower puede interpretar correctamente.
+        """
+        df_compat = df.copy()
+        for col in df_compat.columns:
+            if pd.api.types.is_numeric_dtype(df_compat[col]):
+                df_compat[col] = df_compat[col].astype('float64')
+            else:
+                # Forzamos a tipo primitivo de python
+                df_compat[col] = df_compat[col].astype('object')
+        return df_compat
+
     def entrenar(self, X, y=None):
         """
         Calcula la matriz de Gower y encuentra los perfiles representativos.
         
-        Nota Arquitectonica: A diferencia de la Red Neuronal que recibe el output del 
+        Notaa: A diferencia de la Red Neuronal que recibe el output del 
         Pipeline (variables One-Hot), esta estrategia espera un DataFrame de Pandas 
-        con sus variables categoricas intactas para que Gower funcione correctamente.
+        con sus variables categoricas orginales para que Gower funcione correctamente.
         """
         print("Iniciando entrenamiento de clustering PAM con Distancia de Gower...")
-        
+
         # Guardamos una copia de los datos de entrenamiento.
         # Esto es vital para poder calcular las distancias de clientes futuros.
         self.X_train_referencia = X.copy()
+
+        # 1. Transformamos los tipos de datos para que la libreria no falle
+        X_compat = self._preparar_datos_gower(self.X_train_referencia)
         
-        # 1. Calculamos la matriz de distancias cruzadas
+        # 2. Calculamos la matriz de distancias cruzadas
         print("Calculando matriz de distancias de Gower (Esto puede tomar tiempo)...")
-        matriz_distancias = gower.gower_matrix(self.X_train_referencia)
+        matriz_distancias = gower.gower_matrix(X_compat)
         
-        # 2. Ajustamos el modelo para que encuentre los medoides
+        # 3. Ajustamos el modelo para que encuentre los medoides
         print("Ajustando particiones y buscando clientes representativos...")
         self.modelo.fit(matriz_distancias)
         
@@ -66,11 +84,11 @@ class PamClusteringEstrategia(ModeloEstrategia):
             
         print("Calculando distancias de los nuevos registros contra la base de referencia...")
         
-        # Calculamos la distancia de los registros NUEVOS (X) contra los que ya conoce (X_train_referencia)
-        # Esto genera una matriz asimetrica que el metodo predict de KMedoids sabe interpretar
-        matriz_distancias_nuevas = gower.gower_matrix(data_x=X, data_y=self.X_train_referencia)
+        # Hacemos la conversion de compatibilidad tanto para los datos nuevos como para la base de referencia
+        X_nuevo_compat = self._preparar_datos_gower(X)
+        X_ref_compat = self._preparar_datos_gower(self.X_train_referencia)
         
-        # Asignamos la etiqueta (0 o 1) segun el medoide mas cercano
+        matriz_distancias_nuevas = gower.gower_matrix(data_x=X_nuevo_compat, data_y=X_ref_compat)
         predicciones_cluster = self.modelo.predict(matriz_distancias_nuevas)
         
         return predicciones_cluster
@@ -104,10 +122,7 @@ class PamClusteringEstrategia(ModeloEstrategia):
             
         artefacto_cargado = joblib.load(ruta_archivo)
         
-        # Creamos una instancia vacia
         estrategia = cls()
-        
-        # Inyectamos los componentes guardados
         estrategia.modelo = artefacto_cargado['modelo_pam']
         estrategia.X_train_referencia = artefacto_cargado['X_train_referencia']
         estrategia.indices_medoides = artefacto_cargado['indices_medoides']

@@ -33,7 +33,7 @@ def capturar_datos_cliente():
     Simula el formulario de captura que llenaria un ejecutivo del banco.
     Mapea estrictamente hacia los catalogos de datos limpios.
     """
-    reports.mostrar_encabezado("NUEVA SOLICITUD DE CREDITO HIPOTECARIO")
+    reports.mostrar_encabezado("DEMOSTRACION PARA MODELOS DE RIESGO DE CREDITO")
     print("Por favor, complete la siguiente informacion del solicitante:\n")
 
     # 1. Variables Numericas
@@ -59,30 +59,42 @@ def capturar_datos_cliente():
     
     sector = capturar_seleccion(
         "5. Seleccione el Sector Laboral:",
-        ['Sector privado', 'Sector publico estatal', 'Sector publico federal', 
-         'Trabajador independiente', 'Jubilado / Pensionado']
+        ['Sector privado', 'Sector publico estatal', 'No asalariado', 
+         'Sin clasificar']
     )
     
     estado = capturar_seleccion(
         "6. Seleccione el Estado de ubicacion del Inmueble:",
-        ['CIUDAD DE MEXICO', 'MEXICO', 'NUEVO LEON', 'JALISCO', 
-         'QUERETARO', 'PUEBLA', 'GUANAJUATO', 'OTRO']
+        [
+            'AGUASCALIENTES', 'BAJA CALIFORNIA', 'BAJA CALIFORNIA SUR', 'CAMPECHE',
+            'CHIAPAS', 'CHIHUAHUA', 'CIUDAD DE MEXICO', 'COAHUILA DE ZARAGOZA',
+            'COLIMA', 'DURANGO', 'GUANAJUATO', 'GUERRERO', 'HIDALGO', 'JALISCO',
+            'MEXICO', 'MICHOACAN DE OCAMPO', 'MORELOS', 'NAYARIT', 'NUEVO LEON',
+            'OAXACA', 'PUEBLA', 'QUERETARO', 'QUINTANA ROO', 'SAN LUIS POTOSI',
+            'SINALOA', 'SONORA', 'TABASCO', 'TAMAULIPAS', 'TLAXCALA',
+            'VERACRUZ DE IGNACIO DE LA LLAVE', 'YUCATAN', 'ZACATECAS'
+        ]
     )
     
     destino = capturar_seleccion(
         "7. Seleccione el Destino del Credito:",
-        ['Adquisicion de Vivienda Nueva', 'Adquisicion de Vivienda Usada', 
-         'Pago de Pasivos Hipotecarios', 'Remodelacion', 'Liquidez']
+        ['Adquisicion de Vivienda Nueva', 'Adquisicion de Vivienda Usada', 'Adquisición de Terreno para Vivienda',
+         'Adquisición de Terreno y Construcción Simultánea', 'Construcción de Vivienda Propia',
+         'Mejoras, Ampliaciones y/o Remodelaciones', 'Crédito Para Líquidez', 'Créditos a exempleados de la Entidad',
+         'Pago de Pasivos Hipotecarios', 'Autoproducción de vivienda']
     )
     
     segmento = capturar_seleccion(
         "8. Seleccione el Segmento de la Vivienda:",
-        ['Media o Residencial', 'Interes Social']
+        ['Media o Residencial', 'Interes Social', 'Cartera adquirida al INFONAVIT o el FOVISSSTE', 
+         'Régimen especial de amortización', 'Remodelación o mejoramiento con garantía de la subcuenta de vivienda', 
+         'Remodelación o mejoramiento con gtía otorg Banca Desarrollo o fideic públicos', 'Otro']
     )
     
     moneda = capturar_seleccion(
-        "9. Seleccione la Moneda del Credito:",
-        ['Moneda Nacional (Pesos)', 'VSMG (Veces Salario Minimo General)', 'UDIS']
+        "9. Seleccione la Moneda de Originación de Credito:",
+        ['Moneda Nacional (Pesos)', 'VSMG (Veces Salario Minimo General)', 'UDIS', 'Dólares de E.E.U.U.A.', 
+         'UMA (Unidad de medida y actualización)', '	Sin clasificar']
     )
 
     # Construimos el diccionario con las llaves exactas que espera el DataFrame
@@ -102,7 +114,7 @@ def capturar_datos_cliente():
 
 def principal():
     """
-    Orquestador de Inferencia. Carga los modelos, procesa el input del usuario
+    Orquestador. Carga los modelos, procesa el input del usuario
     y emite un dictamen en cascada (Supervisado -> No Supervisado).
     """
     # --- FASE 1: CAPTURA DE DATOS ---
@@ -113,7 +125,7 @@ def principal():
     df_cliente = pd.DataFrame([diccionario_datos])
     
     # --- FASE 2: CARGA DE ARTEFACTOS Y TRANSFORMACION ---
-    print("\n[Sistema] Consultando motores de inteligencia artificial...\n")
+    print("\n[Sistema] Cargando datos de los modelos...\n")
     
     ruta_modelos = "../models/"
     
@@ -135,7 +147,6 @@ def principal():
         
     except Exception as e:
         print(f" [!] Error critico al cargar los modelos: {str(e)}")
-        print("     Verifica haber ejecutado pipeline_controller.py previamente.")
         return
 
     # --- FASE 3: INFERENCIA Y TOMA DE DECISIONES ---
@@ -149,7 +160,7 @@ def principal():
     # Paso B: El diagnostico descriptivo (K-Medoids)
     # SOLO se ejecuta si la red neuronal predijo riesgo (1)
     if prediccion_riesgo == 1:
-        print("\n[Sistema] Derivando expediente a analisis de perfiles de riesgo...\n")
+        print("\n[Sistema] Comenzando analisis con perfiles de riesgo...\n")
         
         # OJO: K-Medoids y Gower esperan el dataframe CRUDO, no el procesado
         perfil_asignado = modelo_no_supervisado.predecir(df_cliente)[0]

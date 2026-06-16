@@ -40,11 +40,9 @@ def mostrar_prediccion_cliente(es_riesgo):
     mostrar_encabezado("RESULTADO DE LA EVALUACION DE RIESGO")
     
     if es_riesgo == 1:
-        print(" [ ! ] ALERTA: EL CLIENTE PRESENTA ALTO RIESGO DE IMPAGO (ETAPA 3)")
-        print(" Recomendacion: Rechazar solicitud o turnar a comite para garantias adicionales.")
+        print(" [ ! ] RIESGO ALTO: EL CLIENTE PRESENTA CARTERA DETERIORADA (ETAPA 2/3)")
     else:
-        print(" [ v ] APROBADO: EL CLIENTE TIENE UN PERFIL FINANCIERO SANO (ETAPA 1)")
-        print(" Recomendacion: Continuar con el proceso de originacion estandar.")
+        print(" [ v ] RIESGO BAJO: EL CLIENTE TIENE UN PERFIL FINANCIERO SANO (ETAPA 1)")
         
     print("=" * 60 + "\n")
 
@@ -56,11 +54,11 @@ def mostrar_perfil_cluster(cluster_id):
     mostrar_encabezado("ASIGNACION DE PERFIL DE MOROSIDAD")
     
     if cluster_id == 0:
-        print(" -> PERFIL 0: Morosidad por Expansion")
-        print("    (Caracteristicas: Jovenes, Vivienda Nueva, Estado de Mexico)")
+        print(" -> PERFIL 0")
+        print("    (Caracteristicas: Adultos Jovenes, Vivienda Nueva, Estado de Mexico)")
     elif cluster_id == 1:
-        print(" -> PERFIL 1: Morosidad por Vulnerabilidad")
-        print("    (Caracteristicas: Maduros, Vivienda Usada, CDMX)")
+        print(" -> PERFIL 1")
+        print("    (Caracteristicas: Adultos Mayores, Vivienda Usada, CDMX)")
     else:
         print(f" -> ASIGNADO AL CLUSTER: {cluster_id}")
         
