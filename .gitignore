@@ -2,12 +2,20 @@
 data/Base_Historica/Base_Historica/*
 data/Datos_Procesados/*
 
-# Placeholders
-!data/Base_Historica/Base_Historica/.gitkeep
-!data/Datos_Procesados/.gitkeep
-!diagrams/.gitkeep
-!docs/.gitkeep
-!models/.gitkeep
-!notebooks/.gitkeep
-!reports/.gitkeep
-!src/.gitkeep
+# Caché de compilación Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Entornos virtuales y configuraciones locales
+venv/
+env/
+.env
+.vscode/
+
+# Caché de Jupyter Notebooks
+.ipynb_checkpoints/
+
+# 4. Artefactos del Sistema Operativo
+.DS_Store
+Thumbs.db
