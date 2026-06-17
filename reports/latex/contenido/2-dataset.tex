@@ -1,0 +1,99 @@
+\section{Descripción del Conjunto de Datos}
+
+Para esta investigación, se emplea la Base Histórica del Portafolio de Vivienda, un conjunto de datos oficial proporcionado y trabajado por la Comisión Nacional Bancaria y de Valores (CNBV) de México. 
+
+\subsection{Fuente, Tamaño y Arquitectura}
+El conjunto de datos original consta de una magnitud considerable: 6,320,238 observaciones (filas) y 20 atributos (columnas) en su estado crudo. Arquitectónicamente, la información no se presenta como una tabla plana convencional, sino que está modelada bajo un enfoque de Esquema de Estrella (\textit{Star Schema}). En el núcleo de esta estructura reside la tabla de hechos, la cual almacena las métricas cuantitativas y financieras de la cartera. Alrededor de esta tabla central se encuentran 13 catálogos (tablas de dimensiones) que contienen las descripciones en texto de las llaves foráneas, brindando el contexto semántico a variables como la entidad federativa, el sector laboral y el segmento de vivienda.
+
+\subsection{Granularidad: Cohortes}
+Un aspecto crítico para la correcta interpretación de este conjunto de datos es su granularidad. Por normatividad de privacidad y agregación financiera, cada observación en la tabla de hechos no representa a un prestatario individual, sino a una \textbf{cohorte de créditos}. 
+
+Una cohorte agrupa un número determinado de créditos hipotecarios (indicado por la variable \texttt{numero\_de\_creditos}) que comparten exactamente el mismo perfil multidimensional en un mes de reporte específico; es decir, fueron otorgados por la misma institución, en el mismo estado, a personas del mismo género y rango de edad, y se encuentran en la misma etapa de riesgo. En consecuencia, las variables monetarias (como los saldos) actúan como hechos aditivos que suman la exposición total de la cohorte, mientras que métricas como la tasa de interés representan promedios ponderados.
+
+\subsection{Variables}
+Se identificaron 20 atributos de la tabla de hechos, mismos que se han categorizado según su función descriptiva o cuantitativa dentro de nuestro enfoque hipotecario:
+
+\subsubsection*{Dimensiones Temporales e Institucionales}
+Describen el marco temporal y el origen institucional del financiamiento.
+\begin{itemize}
+	\item \textbf{\texttt{periodo}:} Variable temporal que indica el año y mes del reporte contable (formato YYYYMM).
+	\item \textbf{\texttt{clave\_sector}:} Identificador del sector regulado al que pertenece la institución (ej. Banca Múltiple, Banca de Desarrollo).
+	\item \textbf{\texttt{clave\_institucion}:} Llave de la institución financiera que administra el crédito de la cohorte.
+	\item \textbf{\texttt{clave\_moneda}:} Divisa en la que fue originado el financiamiento (Pesos, UDIS, Salarios Mínimos).
+\end{itemize}
+
+\subsubsection*{Dimensiones Demográficas y Socioeconómicas}
+Perfilan las características de los acreditados que conforman la cohorte.
+\begin{itemize}
+	\item \textbf{\texttt{clave\_genero}:} Sexo predominante de los titulares.
+	\item \textbf{\texttt{clave\_intervalo\_edades}:} Clasificación del rango de edad al momento del reporte.
+	\item \textbf{\texttt{clave\_tipo\_acreditado}:} Naturaleza de la fuente de ingresos del prestatario (Asalariado, No Asalariado).
+	\item \textbf{\texttt{clave\_sector\_laboral}:} Ámbito económico donde laboran los integrantes de la cohorte (Sector Público, Privado, Independiente).
+	\item \textbf{\texttt{clave\_intervalo\_ingreso\_acred}:} Clasificación del nivel de ingresos mensuales.
+\end{itemize}
+
+\subsubsection*{Dimensiones Comerciales del Producto y la Vivienda}
+Detallan la naturaleza del activo que funge como garantía.
+\begin{itemize}
+	\item \textbf{\texttt{clave\_estado}:} Entidad federativa en México donde se ubica físicamente el inmueble.
+	\item \textbf{\texttt{clave\_destino\_credito}:} Propósito del capital (Adquisición de vivienda nueva, vivienda usada, liquidez, etc.).
+	\item \textbf{\texttt{clave\_segmento\_vivienda}:} Clasificación comercial del inmueble (Interés social, nivel medio, residencial).
+	\item \textbf{\texttt{clave\_producto\_hipotecario}:} Identificador interno del producto hipotecario otorgado.
+\end{itemize}
+
+\subsubsection*{Hechos y Métricas Financieras}
+Variables continuas y discretas que cuantifican la medidas financieras.
+\begin{itemize}
+	\item \textbf{\texttt{numero\_de\_creditos}:} Conteo total de préstamos individuales consolidados en la cohorte.
+	\item \textbf{\texttt{monto\_originacion\_credito}:} Capital acumulado inicialmente prestado a la cohorte.
+	\item \textbf{\texttt{valor\_vivienda\_originacion}:} Sumatoria del valor de avalúo de las propiedades al momento de la adquisición.
+	\item \textbf{\texttt{saldo\_insoluto\_final\_periodo}:} Deuda principal remanente al corte. Representa la exposición real de riesgo para las instituciones.
+	\item \textbf{\texttt{tasa\_interes\_por\_saldo\_insoluto\_final\_periodo}:} Masa monetaria de intereses generados (el producto de la tasa por el saldo insoluto).
+	\item \textbf{\texttt{tasa\_ponderada}:} Tasa de interés promedio anualizada asignada a la cohorte.
+\end{itemize}
+
+\subsection{Variable Objetivo}
+La variable a predecir y analizar en este estudio es \textbf{\texttt{clave\_etapa}}. Esta clasificación se rige bajo la Norma de Información Financiera Bancaria (NIFBdM) C-16 del Banco de México \cite{nifbdm_c16}, la cual categoriza el deterioro de los Instrumentos Financieros por Cobrar Principal e Interés (IFCPI) en tres niveles de riesgo:
+\begin{enumerate}
+	\item \textbf{Etapa 1 (Riesgo Bajo):} Cohortes cuyo riesgo crediticio no se ha incrementado significativamente desde su originación. Mantienen un perfil de cumplimiento estable.
+	\item \textbf{Etapa 2 (Riesgo Significativo):} Cohortes que han mostrado un aumento palpable en la probabilidad de impago, sirviendo como alerta temprana de deterioro.
+	\item \textbf{Etapa 3 (Riesgo Alto / Cartera Deteriorada):} Cohortes que presentan un deterioro crediticio alto, constituyendo la cartera vencida o en estado de impago.
+\end{enumerate}
+
+\subsection{Limitaciones Conocidas del Conjunto de Datos}
+A pesar de sus características idóneas, el conjunto de datos presenta limitaciones a considerar que condicionan el alcance del modelado:
+\begin{itemize}
+	\item Al ser cohertes, es imposible medir el comportamiento atípico de un individuo específico dentro de un grupo. El análisis asume que todos los individuos dentro de una cohorte comparten un comportamiento idéntico, lo cual refleja un sesgo a considerar, debido a que existen factores humanos que no se encuentran en ninguna base de datos que llevan a cada individuo a la situación de impago.
+	\item El dataset captura características internas de la originación, pero no incluye indicadores externos (como inflación o tasas de desempleo estatal) que también influyen en la transición de una cohorte hacia el incumplimiento.
+\end{itemize}
+
+\subsection{Diccionario original y desnormalizado}
+\begin{table}[H]
+	\centering
+	\begin{tabular}{r p{9cm} l}
+		\hline
+		& \textbf{Variable} & \textbf{Tipo de variable} \\
+		\hline
+		0  & \texttt{periodo} & Categórica ordinal \\
+		1  & \texttt{clave\_sector} & Categórica nominal \\
+		2  & \texttt{clave\_institución} & Categórica nominal \\
+		3  & \texttt{clave\_moneda} & Categórica nominal \\
+		4  & \texttt{clave\_genero} & Categórica nominal \\
+		5  & \texttt{clave\_intervalo\_edades} & Categórica ordinal \\
+		6  & \texttt{clave\_tipo\_acreditado} & Categórica nominal \\
+		7  & \texttt{clave\_sector\_laboral} & Categórica nominal \\
+		8  & \texttt{clave\_intervalo\_ingreso\_acred} & Categórica ordinal \\
+		9  & \texttt{clave\_estado} & Categórica nominal \\
+		10 & \texttt{clave\_destino\_credito} & Categórica nominal \\
+		11 & \texttt{clave\_segmento\_vivienda} & Categórica nominal \\
+		12 & \texttt{clave\_producto\_hipotecario} & Categórica nominal \\
+		13 & \texttt{clave\_etapa} & Categórica ordinal \\
+		14 & \texttt{numero\_de\_creditos} & Numérica discreta \\
+		15 & \texttt{monto\_originacion\_credito} & Numérica continua \\
+		16 & \texttt{valor\_vivienda\_originacion} & Numérica continua \\
+		17 & \texttt{saldo\_insoluto\_final\_periodo} & Numérica continua \\
+		18 & \texttt{tasa\_interes\_por\_saldo\_insoluto\_final\_periodo} & Numérica continua \\
+		19 & \texttt{tasa\_ponderada} & Numérica continua \\
+		\hline
+	\end{tabular}
+\end{table}

@@ -1,0 +1,64 @@
+\documentclass[11pt]{article}
+
+\input{estructura/packages} % Se agregan los paquetes utilizados en el documento.
+\input{estructura/estilo} % Define la marca de agua, encabezado y pie de página.
+
+
+\begin{document} % Inicia el Archivo.
+
+% Descomentar si se necesita agregar portada.
+% \input{estructura/portada}
+	
+% ----- Encabezado corto -----
+\begin{center}
+	\begin{minipage}{3cm}
+		\begin{center}
+			\includegraphics[height=2.4cm]{imagenes/Logo_UNAM.png}
+		\end{center}
+	\end{minipage}\hfill
+	\begin{minipage}{10cm}
+		\begin{center}
+			\textbf{Universidad Nacional Autónoma de México}\\[0.2cm]
+			\textbf{Facultad de Ciencias}\\[0.2cm]
+			\textbf{Almacenes y Minería de Datos}\\[0.2cm]
+			\textbf{Profesora:} Jessica Santizo Galicia\\[0.1cm]
+			\textbf{Ayudante:} Diego Antonio Villalba González\\[0.1cm]
+			\textbf{Ayudante Lab.:} Ares Gael Castro Romero\\[0.3cm]
+		\end{center}
+	\end{minipage}\hfill
+	\begin{minipage}{3cm}
+		\begin{center}
+			\includegraphics[height=2.7cm]{imagenes/Logo_FC.png}
+		\end{center}
+	\end{minipage}
+	\begin{center}
+		\textbf{Proyecto Final}: Minería de Datos Aplicada a México\\[0.1cm]
+		\textbf{Riesgo y Deterioro de la Cartera de la Vivienda}\\[0.3cm]
+		\textbf{Gustavo Alonso Domínguez Sánchez}\\[0.1cm]
+		418047121\\[0.1cm]
+	\end{center}
+\end{center}
+
+\rule{17cm}{0.1mm}
+
+% ----- Fin de encabezado -----
+
+% Descomentar si se necesita agregar índice
+%\tableofcontents
+%\newpage
+
+\begin{spacing}{1.5}
+    \input{contenido/1-introduccion}
+    \input{contenido/2-dataset}
+    \input{contenido/3-preparacion}
+    \input{contenido/4-eda}
+    \input{contenido/5-modelo}
+    \input{contenido/6-clustering}
+\end{spacing}
+
+\nocite{*}
+
+% \bibliographystyle{ACM-Reference-Format}
+% \bibliography{contenido/referencias.bib}
+
+\end{document}

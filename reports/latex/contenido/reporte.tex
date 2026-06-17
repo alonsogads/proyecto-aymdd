@@ -1,0 +1,375 @@
+\section{Introducción}
+
+En las etapas iniciales de muchos proyectos de minería de datos, particularmente durante el Análisis Exploratorio de Datos (EDA) y el Pre-procesamiento de datos (en la etapa de limpieza), lo usual es querer aislar y eliminar los valores extremos. En ese contexto, los valores atípicos son tratados como una molestia estadística que deforman la convergencia o estabilidad de nuestros modelos predictivos. Sin embargo, cuando se quiere trabajar un modelo para la \textbf{Detección de Outliers}, el enfoque se invierte: los datos atípicos dejan de ser un estorbo para convertirse en el objetivo principal del análisis.
+
+\subsection{Outlier y ruido}
+
+Para empezar a abordar el problema de la detección, es imprescindible establecer una distinción conceptual entre outlier y ruido.
+
+El \textbf{ruido} es una interferencia estocástica, es decir variación o error de medida aleatorio que no es explicada dentro de la distribución de los datos, que suelen ser no deseado. Por el contrario, un \textbf{outlier} (o valor atípico) es una observación que tiene características o valores diferentes o inusuales a las demás observaciones del dataset. Un outlier no es un error aleatorio, por lo que no es ruido. La definición formal más aceptada en la literatura estadística fue propuesta por Hawkins (1980), quien establece que una anomalía es:
+
+\begin{quote}
+	\textit{``Una observación que se desvía tanto de las demás observaciones como para despertar sospechas de que fue generada por un mecanismo diferente.''}
+\end{quote}
+
+Matemáticamente, si asumimos que la gran mayoría de nuestros datos $X = \{x_1, x_2, \dots, x_n\}$ son generados implícitamente por una distribución de probabilidad $\mathcal{D}$, un outlier es un punto $x_i$ cuya probabilidad de haber sido generado por $\mathcal{D}$ es extremadamente pequeña, es decir,
+
+\[
+P(x_i \mid X \sim \mathcal{D}) \approx 0
+\]
+
+\begin{tcolorbox}[
+	colback=gray!10,
+	colframe=gray!50,
+	title=Aclaración Semántica: ¿Outlier o Anomalía?
+	]
+	
+	En la literatura coloquial y la estadística básica, suele hacerse una distinción: un \textbf{outlier} se define puramente como un valor numérico extremo (que puede ser un evento genuino y válido de la varianza natural), mientras que una \textbf{anomalía} implica un comportamiento ilegítimo, un error o una desviación del mecanismo esperado que requiere \underline{contexto}.
+	
+	Sin embargo, en la literatura de minería de datos de nuestra bibliografía (particularmente bajo la taxonomía de Chandola), \textbf{ambos términos se utilizan como sinónimos}. En este documento, utilizaremos ambos términos de forma intercambiable.
+	
+	\begin{quote}
+		\textit{``These non-conforming patterns are often referred to as anomalies, outliers, discordant observations, exceptions, aberrations, surprises, peculiarities or contaminants.''}
+	\end{quote}
+	
+\end{tcolorbox}
+
+Los outliers son datos de gran interés para el negocio. Por mencionar algunos ejemplos, en el sector financiero, un outlier puede representar un fraude en transacciones; en ciberseguridad, puede indicar un envío masivo de paquetes de red a un servidor; en la medicina, puede ser el indicador de una patología grave. En todos estos casos, encontrar el evento raro es mucho más difícil que modelar el comportamiento común.
+
+\subsection{Límite entre lo Normal (Típico) y lo Anormal (Atípico)}
+
+Plantear la detección de anomalías como un simple problema de clasificación supervisada (donde $y \in \{0, 1\}$) (es un dato normal o atípico) puede parecer simple, pero en la práctica existen limitaciones fundamentales que justifican el uso de enfoques no supervisados:
+
+\begin{enumerate}
+	\item \textbf{Desbalance extremo de clases:} En un escenario real, la probabilidad de observar un dato normal es muchísimo mayor que la de observar un outlier,
+	
+	\[
+	P(y=\text{normal}) \gg P(y=\text{anomalía})
+	\]
+	
+	Las anomalías suelen representar una ínfima parte del conjunto de datos. Un clasificador clásico, como una Regresión Logística, aprenderá rápidamente que predecir siempre ``normal'' minimiza su función de pérdida global, obteniendo una exactitud (\textit{accuracy}) engañosa del $99.9\%$, pero con una exhaustividad (\textit{recall}) del $0\%$ para la clase de interés.
+	
+	\item \textbf{Delimitaciones espaciales difusas:} La transición entre un comportamiento normal y uno atípico rara vez es discreta o lineal. El límite suele ser una región continua donde la densidad de probabilidad disminuye gradualmente. Definir el hiperplano exacto donde termina la normalidad requiere algoritmos capaces de medir densidades relativas y topologías complejas en alta dimensión.
+	
+	\item \textbf{Anomalías inteligentes:} A diferencia del ruido estático, en aplicaciones de seguridad podemos enfrentarnos a ``anomalías inteligentes''. Por ejemplo, los autores de fraudes modelan intencionalmente su comportamiento para ocultarse dentro de la distribución $\mathcal{D}$, es decir, buscan que la anomalía parezca un dato normal, minimizando su distancia respecto a una media. Por lo tanto, la definición de normal puede cambiar constantemente (\textit{concept drift}), obligando a que nuestros algoritmos se adapten sin depender de un conjunto estático de reglas predefinidas.
+\end{enumerate}
+
+Ante este panorama, la detección de outliers se consolida como una de las áreas más importantes del aprendizaje automático. A continuación, estableceremos la formalización matemática necesaria para clasificar y entender la naturaleza geométrica de estas desviaciones.
+
+\section{Tipos de outliers}
+
+La literatura moderna, fuertemente basada en los trabajos de Chandola (2009), establece que la dificultad de aislar una anomalía radica en la topología de los datos. Por lo tanto, el primer paso es particionar el concepto general de outlier en tres categorías mutuamente excluyentes, dependiendo de su naturaleza estructural.
+
+\subsection{Atípicos Globales o Puntuales}
+
+Son los outliers más elementales y estudiados. Si un dato individual puede considerarse anómalo con respecto al resto de los datos en su totalidad, sin necesidad de información adicional, estamos ante un outlier global o puntual.
+
+\textbf{Definición:} Sea $D$ nuestro conjunto de datos y un punto arbitrario $x_i \in D$. Asumiendo una función de distancia métrica $d(x, y)$ o un modelo de densidad de probabilidad $P(x)$, $x_i$ es una anomalía puntual si satisface:
+
+\[
+d(x_i, \mu_D) > \tau
+\quad \text{o} \quad
+P(x_i) < \epsilon
+\]
+
+donde $\mu_D$ representa el centroide, medoide o centro de masa definido por un algoritmo, $\tau$ es un umbral espacial de desviación (un máximo de distancia tolerable), y $\epsilon$ es un umbral de probabilidad infinitesimal (una probabilidad extremadamente baja de pertenecer a la distribución $P$).
+
+\textbf{Ejemplo:} En una base de datos transaccional, una transferencia aislada de $\$500{,}000$ MXN en una cuenta de nómina promedio representa una desviación extrema de los datos. Este registro se proyectará en un espacio de características lejos de cualquier centro de masa conocido.
+
+\subsection{Atípicos Contextuales}
+
+Una observación es anómala \textit{exclusivamente} bajo un contexto específico, pero podría ser catalogada como un dato de comportamiento normal bajo condiciones distintas. Para modelar este tipo, se dividen los atributos de cada observación $x_i$ en dos particiones:
+
+\begin{enumerate}
+	\item Sea $C$ el conjunto de atributos contextuales, los cuales definen el contexto de la observación (ej. ubicación temporal o espacial).
+	
+	\item Sea $B$ el conjunto de atributos de comportamiento, los cuales deseamos evaluar (ej. monto de operación, temperatura registrada).
+\end{enumerate}
+
+Tal que el conjunto de atributos de los datos cumple:
+
+\[
+Y = B \cup C,
+\qquad
+B \cap C = \emptyset
+\]
+
+\textbf{Definición:}
+
+Sea el dato $x_i = (x_{Ci}, x_{Bi})$. La condición de anomalía de $x_i$ no depende de la probabilidad marginal del comportamiento $P(x_{Bi})$, sino de la probabilidad condicional de observar dicho comportamiento dado su contexto $P(x_{Bi} \mid x_{Ci})$. Entonces, un outlier es contextual si:
+
+\[
+P(x_{Bi} \mid x_{Ci}) < \epsilon
+\]
+
+\textbf{Ejemplo:} Registrar un cargo en tarjeta de crédito por $\$5{,}000$ MXN ($x_{Bi}$) es un evento común con alta probabilidad marginal. Sin embargo, si los atributos contextuales ($x_{Ci}$) de temporalidad indican que ocurrió a las 3:00 a.m., y el contexto espacial indica que el cobro fue originado en el extranjero, la probabilidad condicional es extremadamente pequeña, por lo que el dato se trata de un outlier contextual.
+
+\subsection{Atípicos Colectivos}
+
+En este escenario, los puntos de datos individuales que conforman la anomalía no son anómalos por sí mismos. Lo que constituye la anomalía es su aparición conjunta como una secuencia, un grupo o un patrón. Las anomalías colectivas solo pueden ocurrir en conjuntos de datos donde las instancias están interrelacionadas (datos secuenciales, espaciales o grafos).
+
+\textbf{Definición:}
+
+Sea un subconjunto $S \subset D$, tal que para todo punto individual $x_i \in S$, la probabilidad $P(x_i)$ es normal. Sin embargo, el conjunto $S$ viola la estructura estocástica general:
+
+\[
+P(S) < \epsilon
+\quad \text{tal que los individuos no son independientes}
+\quad
+P(S) \neq \prod_{x_i \in S} P(x_i)
+\]
+
+La desigualdad nos indica que la correlación interna y la estructura del subconjunto $S$ son las variables que definen la anomalía, no los valores aislados.
+
+\textbf{Ejemplo:} En el análisis del tráfico de red de un servidor, el rechazo de un paquete de datos es un evento ordinario. Pero un subconjunto $S$ de 10,000 rechazos de paquetes dirigidos al mismo puerto en un lapso de un par de segundos constituye un ataque de seguridad, en particular un Ataque de Denegación de Servicio (DDoS). Individualmente son eventos normales; colectivamente, forman una topología de ataque coordinado.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.60]{imagenes/Capturas/im1.png}
+	\vspace{-0pt}
+	\caption{Proyección 3D de las transacciones de un e.commerce para la detección de anomalías.}
+	\vspace{-0pt}
+\end{figure}
+
+\section{Enfoques para la Detección}
+
+La detección de anomalías es un problema que carece de una formulación única y definitiva. La decisión sobre qué algoritmo utilizar depende enteramente de cómo definamos la ``normalidad'' en nuestros datos. Existen diferentes enfoques que podemos adoptar.
+
+\subsection{Métodos Estadísticos vs. Basados en Proximidad}
+
+Los métodos estadísticos asumen que los datos siguen una distribución de probabilidad conocida (por ejemplo, una distribución normal o gaussiana). Bajo este enfoque, un dato se considera atípico si cae más allá de un umbral estadístico determinado. La gran limitación de estos métodos es que en el mundo real (especialmente con múltiples dimensiones), los datos rara vez siguen una distribución teórica perfecta.
+
+Para solventar esto, utilizamos los métodos basados en proximidad, los cuales son no paramétricos (no asumen ninguna distribución). Su premisa es puramente geométrica: \textit{un registro es atípico si la cercanía a sus vecinos es significativamente menor que la cercanía de la mayoría de los otros registros a sus respectivos vecinos}.
+
+Para medir esta cercanía, dependemos de funciones de similitud y distancia. Las principales métricas utilizadas en minería de datos son:
+
+\begin{itemize}
+	
+	\item \textbf{Distancia Euclidiana:} Calcula la distancia mínima en línea recta entre dos objetos $a$ y $b$ con $p$ atributos numéricos. Es muy sensible a valores extremos.
+	
+	\[
+	d(a,b) = \sqrt{
+		(x_{a1}-x_{b1})^2 +
+		(x_{a2}-x_{b2})^2 +
+		\dots +
+		(x_{ap}-x_{bp})^2
+	}
+	\]
+	
+	\item \textbf{Distancia de Manhattan:} Calcula la distancia como la suma de las diferencias absolutas en cada eje coordenado (sin movimientos diagonales).
+	
+	\[
+	d(a,b) =
+	|x_{a1} - x_{b1}| +
+	|x_{a2} - x_{b2}| +
+	\dots +
+	|x_{ap} - x_{bp}|
+	\]
+	
+	\item \textbf{Distancia de Hamming y Gower:} Hamming se utiliza para contar diferencias en datos categóricos. Gower es la métrica de grado industrial para calcular la similitud en bases de datos que mezclan datos numéricos y nominales, asegurando que la salida se mantenga en el intervalo $[0, 1]$.
+	
+\end{itemize}
+
+\begin{tcolorbox}[
+	colback=red!5,
+	colframe=red!70!black,
+	title=Escalamiento de Datos
+	]
+	
+	Como se establece en el análisis de proximidad, antes de aplicar cualquier fórmula de distancia matemática, \textbf{los datos deben estar escalados} (por ejemplo, con media cero y desviación estándar de uno). Si omitimos este paso, el atributo con el rango de valores más grande dominará por completo el cálculo de la distancia, generando detecciones de anomalías falsas y sesgadas.
+	
+\end{tcolorbox}
+
+Utilizando estas distancias, los enfoques de proximidad detectan outliers buscando:
+
+\begin{enumerate}
+	\item Los datos que tienen menos de $p$ vecinos a una distancia $d$ establecida.
+	
+	\item Los datos cuya distancia al $k$-ésimo vecino más cercano es la mayor.
+	
+	\item Los datos cuya distancia promedio a los $k$ vecinos más cercanos es la mayor.
+\end{enumerate}
+
+\subsection{Detección Basada en Clustering}
+
+Mientras que los métodos de proximidad evalúan el vecindario local punto por punto, los métodos basados en clustering adoptan una visión global del conjunto de datos.
+
+Estos algoritmos no fueron diseñados originalmente para encontrar anomalías, sino para encontrar grupos similares. Sin embargo, podemos usarlos como detectores de outliers basándonos en un supuesto fundamental de distribución:
+
+\begin{quote}
+	Los datos normales pertenecen a clústeres grandes y densos, en tanto que los outliers pertenecen a clústeres pequeños, dispersos, o no pertenecen a ninguno.
+\end{quote}
+
+Bajo este enfoque, si forzamos a un algoritmo de particionamiento a clasificar todos los datos, un registro será considerado anómalo si la distancia entre dicho registro y el centro del clúster más cercano es desproporcionadamente grande.
+
+La salida de este análisis no siempre es binaria (normal vs. anómalo). Dependiendo del algoritmo, la salida puede ser:
+
+\begin{itemize}
+	\item \textbf{Una etiqueta:} Clasificación dura que indica si es outlier o no.
+	
+	\item \textbf{Una calificación:} Un valor continuo que cuantifica el nivel de anomalía de cada dato (como vimos en la gráfica de proximidad anterior).
+	
+	\item \textbf{Una lista:} Los top-$n$ registros más alejados en distancia o proximidad.
+\end{itemize}
+
+\section{Algoritmos Clásicos y sus Limitaciones}
+
+Como establecimos en la detección basada en clustering, los algoritmos de particionamiento no fueron concebidos para buscar ruido, sino para consolidar densidades. Sin embargo, al modelar matemáticamente lo que es ``normal'', las anomalías emergen como un subproducto: son los residuos geométricos del modelo.
+
+A continuación, analizaremos a profundidad cómo se adaptan las dos familias clásicas de clustering (particionamiento y jerarquía) para la detección, y desglosaremos las limitaciones matemáticas inherentes a su diseño.
+
+\subsection{K-Means: ventajas y limitaciones}
+
+El algoritmo K-Means es, por su eficiencia computacional, una de las primeras opciones para aislar outliers globales. Su mecanismo de detección post-entrenamiento es directo: un objeto $x$ se clasifica como anómalo si la distancia euclidiana a su centroide asignado $\mu_i$ excede un umbral predefinido.
+
+La calidad del agrupamiento en K-Means se define mediante la minimización de la Suma de Errores Cuadrados Intra-clúster (SSE o $E$):
+
+\[
+E = \sum_{i=1}^{k} \sum_{x \in C_i} d(x, \mu_i)^2
+=
+\sum_{i=1}^{k} \sum_{x \in C_i} \|x - \mu_i\|^2
+\]
+
+donde $\mu_i$ es la media aritmética de los puntos en el clúster $C_i$.
+
+\subsubsection{Limitaciones con centroides}
+
+Si analizamos la función $E$, notamos que la penalización por la distancia es cuadrática. Esto introduce una limitación importante: si existe un outlier global extremo en el espacio de características, su distancia al cuadrado representará una porción masiva del error total $E$. Dado que la naturaleza del algoritmo es minimizar este error, K-Means compensará moviendo agresivamente el centroide $\mu_i$ hacia el outlier.
+
+Esta deformación del espacio tiene dos consecuencias fatales para la detección de anomalías:
+
+\begin{enumerate}
+	\item \textbf{Falsos Negativos:} Al arrastrar el centroide hacia sí mismo, el outlier acorta su propia distancia a $\mu_i$, camuflándose y reduciendo su ``score'' de anomalía tanto para sí mismo como para otras observaciones, clasificándolos como normales pudiendo ser outliers genuinos.
+	
+	\item \textbf{Falsos Positivos:} Al desplazar el centroide lejos del centro de masa real de los datos normales, los puntos legítimos que quedaron en el extremo opuesto ahora reportarán una distancia artificialmente alta, siendo clasificados erróneamente como anomalías.
+\end{enumerate}
+
+\subsubsection{Alternativa con medoides: K-Medoides (PAM)}
+
+Para mitigar la extrema sensibilidad a los valores atípicos, el algoritmo Partitioning Around Medoids (PAM) sustituye la media geométrica por un \textbf{medoide}. Un medoide es un punto de datos \textit{real} perteneciente al conjunto, elegido de tal forma que se minimice la suma de distancias absolutas (no cuadráticas) hacia los demás puntos de su clúster.
+
+Al utilizar métricas como la distancia de Manhattan y evitar el promedio ponderado, PAM se vuelve más robusto. El centro de gravedad del clúster se mantiene anclado en la densidad real de los datos, permitiendo que el outlier global permanezca verdaderamente aislado y que su puntaje de anomalía refleje la realidad.
+
+\subsection{Algoritmos jerárquicos para detección de anomalías}
+
+A diferencia de los métodos de particionamiento, los algoritmos jerárquicos como AGNES (AGglomerative NESting) eliminan la obligación de adivinar el hiperparámetro $k$ \textit{a priori}. Al construir un árbol de agrupaciones desde las hojas (donde cada punto es un clúster individual) hasta la raíz (un único clúster universal), el enfoque jerárquico nos otorga un panorama completo de la topología de los datos a múltiples escalas de resolución.
+
+\textbf{Mecanismo de detección en dendrogramas}
+
+En el clustering aglomerativo, las anomalías se revelan visual y matemáticamente en la estructura del dendrograma. Bajo este enfoque, un registro (o un micro-clúster) se considera anómalo si se cumple alguna de las siguientes condiciones estructurales:
+
+\begin{enumerate}
+	\item \textbf{Aislamiento tardío:} El nodo que contiene la anomalía no se fusiona con la masa principal de datos sino hasta los niveles más altos del árbol (distancias de enlace muy grandes, cerca de la raíz), indicando un atípico global.
+	
+	\item \textbf{Tamaño del clúster:} Si al ``cortar'' el dendrograma a un nivel de distancia lógico, obtenemos un clúster que contiene una fracción minúscula del total de los datos (por ejemplo, menos del $1\%$), ese grupo completo puede ser clasificado como un conjunto de atípicos colectivos.
+\end{enumerate}
+
+\textbf{Criterios de Ligamiento}
+
+La capacidad de un árbol jerárquico para aislar anomalías depende críticamente del criterio que define la distancia entre dos clústeres.
+
+\begin{itemize}
+	
+	\item \textbf{Ligado Sencillo:} Define la distancia entre dos clústeres como la distancia mínima entre sus puntos más cercanos. Es el peor enfoque para datos ruidosos debido al fenómeno de ``encadenamiento'': un outlier que actúe como un puente entre dos clústeres densos forzará al algoritmo a fusionarlos prematuramente.
+	
+	\item \textbf{Ligado Completo:} Toma la distancia entre los dos puntos más alejados de cada clúster. Sin embargo, esto también introduce un problema, ya que un outlier alejado en un clúster hará que el algoritmo se niegue a unirlos, incluso si la mayoría de sus masas están juntas.
+	
+	\item \textbf{Promedio:} Promedia todas las distancias punto a punto. Representa un enfoque balanceado.
+	
+	\item \textbf{Ward:} Mide la proximidad entre dos clústeres considerando el mínimo incremento de la suma de la distancia al cuadrado de los elementos de cada clúster respecto a su centroide.
+	
+\end{itemize}
+
+El ligado completo utiliza la distancia máxima, mientras que Ward busca minimizar el incremento en la varianza intra-clúster tras la fusión. Ambos son drásticamente superiores para la detección de anomalías, ya que obligan al algoritmo a formar clústeres esféricos y compactos, forzando a los outliers a permanecer marginados en ramas huérfanas durante casi todo el proceso aglomerativo.
+
+\subsection{DBSCAN: Detección por densidad}
+
+Hasta este punto, hemos demostrado cómo los algoritmos basados en particionamiento (K-Means, PAM) operan bajo una lógica de \textit{distancia}. Sin embargo, asumen implícitamente que los clústeres tienen formas esféricas y densidades similares. En dominios reales (como veremos en nuestro caso de aplicación), los datos suelen presentar densidades heterogéneas, donde un grupo normal puede ser muy compacto y otro grupo normal muy disperso.
+
+Para superar esta barrera, introducimos un cambio de paradigma: la agrupación basada en densidad, cuyo máximo exponente es el algoritmo \textbf{DBSCAN (Density-Based Spatial Clustering of Applications with Noise)}.
+
+\textbf{Mecánica de la densidad}
+
+A diferencia de K-Means, DBSCAN no requiere que le indiquemos el número de clústeres $k$. En su lugar, el usuario debe definir empíricamente qué significa que un área sea ``densa'' utilizando dos hiperparámetros fundamentales:
+
+\begin{enumerate}
+	\item $\epsilon$ (\textit{eps}): El radio espacial que define la vecindad de un punto.
+	
+	\item $MinPts$ (\textit{min\_samples}): La cantidad mínima de observaciones requeridas dentro del radio $\epsilon$ para considerar que esa región es densa.
+\end{enumerate}
+
+\textbf{Clasificación y Detección Directa de Anomalías}
+
+Con base en estos dos parámetros, DBSCAN escanea el espacio de características y clasifica estrictamente todos los puntos del conjunto de datos en tres categorías:
+
+\begin{itemize}
+	
+	\item \textbf{Puntos Centrales (Core Points):} Aquellos que tienen al menos $MinPts$ vecinos en su radio $\epsilon$. Son el núcleo de un clúster normal.
+	
+	\item \textbf{Puntos Fronterizos (Border Points):} Tienen menos de $MinPts$ vecinos, pero caen dentro del radio de un punto central. Pertenecen al clúster, formando sus bordes.
+	
+	\item \textbf{Puntos Ruido (Noise Points):} Son observaciones marginadas. Tienen menos de $MinPts$ vecinos y no son alcanzables desde ningún punto central.
+	
+\end{itemize}
+
+\textbf{¿Por qué lo introducimos?}
+
+Para la detección de anomalías, DBSCAN aísla las desviaciones directamente al asignarles una etiqueta de ``ruido''. Esto captura automáticamente los outliers globales y contextuales (ya que por naturaleza son poco densos), mientras que los outliers colectivos (que sí tienen una significativa densidad interna) pueden ser interceptados analizando los micro-clústeres que se formen con una masa total extremadamente baja.
+
+De esta forma, el algoritmo DBSCAN resuelve las deficiencias del particionamiento evaluando la densidad local de los puntos en lugar de depender de sumas de distancias globales al cuadrado. Agrupa objetos que están muy juntos y separa las áreas dispersas considerándolas como anomalías y, a diferencia de algoritmos como K-Means o PAM, no requiere definir el número de grupos, lo que le permite encontrar clústeres de formas irregulares.
+
+\section{Conclusiones}
+
+A lo largo de este documento, hemos transitado desde la definición matemática de valor atípico hasta los distintos enfoques para la detección de outliers, y algoritmos como K-Means, PAM y DBSCAN. Hemos estudiado que las anomalías no son simples errores de medición, sino observaciones críticas que revelan intrusiones, fraudes o fallas sistémicas.
+
+\subsection{Ventajas y limitaciones de la detección por clustering}
+
+Utilizar algoritmos no supervisados como K-Means, PAM o Clustering Jerárquico para la detección de outliers ofrece la ventaja fundamental de no requerir datos previamente etiquetados, permitiendo el descubrimiento de patrones anómalos emergentes.
+
+Sin embargo, el enfoque basado puramente en distancias globales y particionamiento presenta limitaciones matemáticas importantes:
+
+\begin{itemize}
+	
+	\item Las funciones objetivo que minimizan errores cuadráticos (como SSE) son extremadamente vulnerables, permitiendo que un outlier arrastre los centroides y deforme las fronteras de decisión, generando falsos negativos.
+	
+	\item Asumir que lo ``normal'' siempre forma esferas densas provoca que estos algoritmos fallen al modelar distribuciones heterogéneas, donde distintos grupos naturales presentan densidades muy diversas.
+	
+\end{itemize}
+
+\subsection{Detección Avanzada}
+
+Para resolver el problema geométrico de las distancias globales, introdujimos la transición hacia la \textbf{agrupación por densidad (DBSCAN)}. Al evaluar si un punto pertenece a una región densa independientemente de su forma, logramos recuperar cada tipo de anomalías (globales, contextuales y colectivas).
+
+Sin embargo, existen otros modelos diseñados explícitamente para aislar atípicos, tales como el \textit{Local Outlier Factor (LOF)} y \textit{One-Class SVM}, algoritmos que también son capaces de construir fronteras topológicas robustas en espacios de características de alta dimensión.
+
+\begin{thebibliography}{99}
+	
+	\bibitem{lopez_gaona_libro}
+	López Gaona, Áviles Rosas, \& López Mendoza. (2021).
+	\textit{Minería de Datos con R}.
+	UNAM.
+	
+	\bibitem{chandola2009anomaly}
+	Chandola, V., Banerjee, A., \& Kumar, V. (2009).
+	\textit{Anomaly detection: A survey}.
+	ACM Computing Surveys (CSUR), 41(3), 1--58.
+	ACM, New York, NY, USA.
+	
+	\bibitem{aggarwal2017outlier}
+	Aggarwal, C. C. (2017).
+	\textit{Outlier analysis}.
+	Springer.
+	
+	\bibitem{hawkins1980identification}
+	Hawkins, D. M. (1980).
+	\textit{Identification of outliers}.
+	Chapman and Hall.
+	
+	\bibitem{sciencedirect_outlier}
+	Elsevier B.V. (2026).
+	\textit{Outlier - an overview | ScienceDirect Topics}.
+	Disponible en:
+	\url{https://www.sciencedirect.com/topics/social-sciences/outlier}
+	(Accedido en mayo de 2026).
+	
+\end{thebibliography}

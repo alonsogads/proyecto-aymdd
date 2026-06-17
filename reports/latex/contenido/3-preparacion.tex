@@ -1,0 +1,30 @@
+\section{Limpieza y Preparación de Datos}
+En esta fase, se transformó la base de datos relacional cruda en un conjunto de datos interpretable,  optimizado y libre de ruido. A continuación se justifican cada decisión con base en la naturaleza del dataset.
+
+\subsection{Integración y Muestreo Estratificado}
+El primer paso fue la desnormalización del Esquema de Estrella (\textit{Star Schema}). Se realizaron cruces relacionales (\textit{Left Joins}) entre la tabla de hechos y los 13 catálogos dimensionales para reemplazar las llaves foráneas numéricas por sus descripciones de texto. Este paso es fundamental para garantizar que los modelos posteriores sean interpretables.
+
+Posterior a la integración, la cantidad total seguía siendo las 6.3 millones de observaciones. Dado que la segunda fase del proyecto contempla algoritmos de agrupamiento basados en el cálculo de distancias (con una complejidad computacional de $\mathcal{O}(N^2)$), procesar la población completa resulta ineficiente e inviable. Por consiguiente, se extrajo una muestra de 1,000,000 de registros. Para garantizar la representatividad estadística, se aplicó un \textbf{muestreo estratificado} sobre la variable objetivo (\texttt{etapa}). Esta decisión asegura que las proporciones del desbalance de clases originario (donde la Etapa 3 representa aproximadamente el 8.03\% del total) se conserven para el proceso de entrenamiento, evitando sesgos inducidos por un mal submuestreo.
+
+\subsection{Tratamiento de Valores Faltantes}
+En bases de datos provenientes de entidades financieras y trabajadas por el gobierno, es esperable que el dataset obtenido, tenga indicios de un preprocesamiento nativo. En particular, aunque exista la ausencia de valores nulos, se logró descubrir que es posible que existan dichos valores, solo que están enmascarados bajo códigos de ausencia de información: esto se comprobó al ejecutar un escaneo buscando etiquetas como ``No aplica'' o ``Sin clasificar''. Sin embargo, al encontrar estas etiquetas en variables que no serán de interés (como se analizará más adelante), no fue necesario aplicar técnicas de para el tratamiento de faltantes.
+
+\subsection{Tratamiento de Valores Atípicos (Outliers)}
+El análisis del Rango Intercuartílico (IQR) reveló que aproximadamente el 12.6\% de la muestra en las variables monetarias excedía el límite superior estadístico. 
+
+Tras comprender con detenimiento estos outliers, a diferencia de otros dominios donde los valores atípicos representan errores de medición que deben eliminarse o tratarse, en el contexto de la evaluación de riesgo a nivel cohorte, cifras atípicas (como un saldo insoluto acumulado de \$15 millones de pesos) representan realidades comerciales válidas, tales como desarrollos inmobiliarios de gran escala o cohortes densamente pobladas. Al revisar el porcentaje de atípicos (12\%), eliminarlas del portafolio destruiría la representatividad de la cartera y sesgaría la capacidad de generalización del modelo. Por lo tanto, \textbf{se decidió no eliminar ninguna observación}. Aunque para mitigar el impacto de estas magnitudes extremas en los gradientes de la red neuronal, se difirió el tratamiento de estos atípicos a la fase de modelado mediante el uso de escaladores robustos resistentes a valores atípicos (como el \textit{RobustScaler}, basado en la mediana).
+
+\subsection{Transformación y Estandarización Monetaria}
+Se identificó la presencia de diversas divisas de originación (\texttt{moneda}: Pesos, UDIS, Veces Salario Mínimo General). Mezclar saldos en distintas divisas constituiría un error. Sin embargo, conforme a los criterios de la CNBV, todos los valores monetarios reportados ya se encuentran estandarizados en Moneda Nacional (MXN) al tipo de cambio del cierre del periodo. Por lo que no fue necesario una conversión.
+
+Y no solo eso. En México, los esquemas de financiamiento denominados en VSMG o UDIS presentan una amortización negativa ligada a la inflación, lo que intrínsecamente aumenta el riesgo de incumplimiento a largo plazo. Esta variable se retuvo como un fuerte predictor estructural.
+
+\subsection{Reducción de Dimensionalidad y Selección de Características}
+Para optimizar el espacio de características, se evaluó la aplicación de técnicas como el Análisis de Componentes Principales (PCA). Dicha técnica fue \textbf{descartada} por dos motivos críticos: asume implícitamente que los datos son numéricos continuos (mientras que el portafolio es predominantemente categórico) e impide la interpretabilidad de las variables, un requisito indispensable en la evaluación del riesgo financiero y la exploración de perfiles de riesgo.
+
+En su lugar, se aplicó una técnica de Selección de Características (\textit{Feature Selection}), aplicando los siguientes criterios de exclusión:
+\begin{enumerate}
+	\item \textbf{Alta Colinealidad:} Se detectó una relación lineal casi perfecta ($|r| > 0.94$) entre las variables de masa monetaria. Dado que el objetivo del proyecto es evaluar el comportamiento actual de la cartera y no la aprobación de créditos, se eliminó el \texttt{monto\_originacion\_credito} y el \texttt{valor\_vivienda}, conservando únicamente el \texttt{saldo\_insoluto\_final\_periodo} como el indicador al momento del incumplimiento (\textit{Exposure at Default}).
+	\item \textbf{Redundancia Categórica:} Las variables \texttt{tipo\_acreditado} y \texttt{sector\_laboral} exhibieron una distribución idéntica de frecuencias. Al significar lo mismo, era indiferente cual de las dos conservar, pero en particular se optó por \texttt{sector\_laboral} por ser un nombre más corto.
+	\item \textbf{Alta Cardinalidad:} La variable \texttt{clave\_producto\_hipotecario} cuenta con más de 470 categorías nominales con baja concentración. Introducirla generaría una matriz dispersa masiva y propiciaría el sobreajuste (\textit{overfitting}). Esta variable, junto con identificadores administrativos (\texttt{institucion}, \texttt{sector}, \texttt{periodo}), fue suprimida.
+\end{enumerate}

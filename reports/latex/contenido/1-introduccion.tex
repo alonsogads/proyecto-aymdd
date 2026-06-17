@@ -1,0 +1,33 @@
+\section{Introducción}
+
+El acceso a la vivienda es un pilar fundamental para el desarrollo económico, la estabilidad social y la generación de patrimonio en México. No obstante, el financiamiento hipotecario que posibilita este acceso conlleva un riesgo inherente y asimétrico para las instituciones que lo otorgan. Cuando una proporción significativa de los créditos financiados transita hacia una fase de incumplimiento, se genera un deterioro en la cartera que no solo compromete la liquidez y solvencia del sector financiero, sino que, a nivel macroeconómico, encarece el costo del crédito y frena la expansión del mercado inmobiliario nacional. 
+
+En el contexto actual de la economía, caracterizada por la volatilidad de los ingresos y marcadas disparidades geográficas, la evaluación tradicional del riesgo es típicamente basada en historiales crediticios multidimensionales. Por lo que, resulta imperativo comprender la anatomía del incumplimiento a un nivel granular para diseñar políticas de evaluación más focalizadas, sostenibles y robustas ante fluctuaciones económicas.
+
+\subsection{Objetivos del Proyecto}
+El propósito central de este proyecto es aplicar el marco de trabajo de Minería de Datos (fundamentado en la metodología CRISP-DM) sobre la Base Histórica del Portafolio de Vivienda de México, con el fin de extraer conocimiento accionable sobre los factores que propician el deterioro de los créditos. Este propósito se divide en dos vertientes metodológicas:
+
+\begin{itemize}
+	\item \textbf{Objetivo Predictivo (Aprendizaje Supervisado):} Desarrollar, entrenar y evaluar un modelo de clasificación basado en redes neuronales profundas que sea capaz de predecir la probabilidad matemática de que una cohorte o crédito específico entre en un estado de riesgo significativo. Esto permitirá una evaluación temprana basada en el cruce de características demográficas, financieras y estructurales.
+	\item \textbf{Objetivo Descriptivo (Aprendizaje No Supervisado):} Aplicar algoritmos de agrupamiento avanzado para descubrir la estructura latente dentro de la cartera deteriorada. Se busca segmentar a las cohortes en perfiles de comportamiento, aislando e identificando los arquetipos estructurales que caracterizan al incumplimiento en distintas regiones y sectores demográficos del país.
+\end{itemize}
+
+\subsection{Justificación}
+Para dimensionar adecuadamente la pertinencia y el alcance metodológico de esta investigación, se da respuesta explícita a las siguientes interrogantes rectoras:
+
+\textbf{1. ¿Cuál es el problema?} \\
+El problema radica en la dificultad de las instituciones financieras para identificar de manera anticipada qué combinaciones de factores socioeconómicos y características del producto hipotecario propician que un crédito transite de un estado de riesgo bajo hacia la cartera vencida o deteriorada. Esta comprensión profunda de la multidimensionalidad puede impedir una evaluación proactiva y generar vulnerabilidades sistémicas frente al incumplimiento.
+
+\textbf{2. ¿Por qué es relevante?} \\
+En el panorama nacional, el problema tiene un impacto socioeconómico profundo. El crecimiento de la cartera deteriorada desestabiliza la capacidad de las instituciones para otorgar nuevos financiamientos, lo que se traduce en un endurecimiento de las condiciones crediticias (mayores tasas de interés y requisitos más restrictivos). Esto margina a amplios sectores de la población mexicana del acceso a una vivienda formal, perpetuando ciclos de desigualdad y afectando a otros sectores como la industria de la construcción, una de las principales fuentes de empleo en el país.
+
+\textbf{3. ¿Qué se busca lograr?} \\
+Se busca transformar datos históricos en modelos matemáticos capaces de predecir y segmentar el riesgo crediticio. El objetivo medible es construir herramientas algorítmicas que permitan, por un lado, discernir con alta precisión estadística entre perfiles de riesgo bajo y riesgo significativo; y por otro, identificar patrones geográficos y demográficos específicos (por ejemplo, diferencias en el deterioro entre cohortes jóvenes en zonas de expansión frente a cohortes de adultos mayores en zonas urbanas consolidadas).
+
+\textbf{4. ¿Por qué este dataset?} \\
+Los datos seleccionados corresponden al Portafolio de Vivienda proporcionado por la Comisión Nacional Bancaria y de Valores (CNBV). La elección de este conjunto de datos es ideal debido a su naturaleza oficial, su representatividad a escala federal y su volumen masivo. A diferencia de conjuntos de datos artificiales o enfocados a otra escala regional, esta base histórica contiene la realidad exacta del mercado nacional, integrando variables fundamentales tanto del producto financiero (tasa ponderada, saldos, destino del crédito) como del acreditado (intervalos de ingreso, edad, sector laboral), lo cual es altamente necesario para responder a los objetivos planteados.
+
+\subsection{Valor del Proyecto}
+El valor principal de esta investigación reside en la transición hacia un enfoque de evaluación predictivo y descriptivo. Al proporcionar a las instituciones una metodología rigurosa para perfilar el riesgo estructural, el proyecto ofrece un marco de referencia que facilita la toma de decisiones fundamentadas. 
+
+Comprender qué atributos empujan a las cohortes hacia el incumplimiento permite a los tomadores de decisiones diseñar estrategias de mitigación de riesgo especializadas; por ejemplo reestructuraciones del plan de crédito o ajustes en el diseño de los productos hipotecarios; protegiendo así la integridad de la cartera sin sacrificar la misión social de proveer acceso a la vivienda. Adicionalmente, el proyecto demuestra la implementación de arquitecturas de \textit{Machine Learning} con principios de ingeniería de software y orientadas a objetos dentro para entornos financieros.
