@@ -3,8 +3,8 @@ project:
   output-dir: docs
 
 website:
-  title: "Riesgo Crediticio - Minería de Datos"
-  description: "Análisis y modelado del portafolio hipotecario"
+  title: "Almacenes y Minería de Datos: Proyecto Final"
+  description: "Riesgo y Deterioro de la Cartera de la Vivienda"
   navbar:
     left:
       - href: index.qmd

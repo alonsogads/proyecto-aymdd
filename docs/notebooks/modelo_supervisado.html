@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>1. Definición del Problema y Estrategia de Modelado – Riesgo Crediticio - Minería de Datos</title>
+<title>1. Definición del Problema y Estrategia de Modelado – Almacenes y Minería de Datos: Proyecto Final</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -146,7 +146,7 @@ window.Quarto = {
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="../index.html">
-    <span class="navbar-title">Riesgo Crediticio - Minería de Datos</span>
+    <span class="navbar-title">Almacenes y Minería de Datos: Proyecto Final</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
@@ -156,7 +156,7 @@ window.Quarto = {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../index.qmd"> 
+    <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Inicio</span></a>
   </li>  
   <li class="nav-item">
@@ -253,7 +253,22 @@ window.Quarto = {
 <p>Tras haber procesado nuestro datase durante la fase de Análisis Exploratorio de Datos, el objetivo de este notebook es construir, entrenar y evaluar un algoritmo de aprendizaje supervisado capaz de identificar el nivel de riesgo de la cartera hipotecaria. Optaremos por el desarrollo de una Red Neuronal Multicapa (MLP) utilizando el framework PyTorch, contrastando su desempeño contra una línea base estadística tradicional (Regresión Logística). Como primer paso describiremos explicitamente el problema debe resolver nuestro modelo supervisado y qué métricas priorizaremos para lograrlo.</p>
 <section id="variable-objetivo-y-vector-de-características" class="level2">
 <h2 class="anchored" data-anchor-id="variable-objetivo-y-vector-de-características">1.1. Variable objetivo y Vector de características</h2>
-<p>Alineados al objetivo de gestión de riesgo de la NIFBdM C-16, definimos nuestro problema como una tarea de <strong>clasificación multiclase</strong>. * Variable objetivo (<span class="math inline">\(Y\)</span>): <code>etapa</code>. Representa el nivel de deterioro del crédito. Definimos el espacio de etiquetas como <span class="math inline">\(Y \in \{1, 2, 3\}\)</span>, correspondientes a: * <strong>Etapa 1 - Riesgo de crédito bajo o normal</strong>: Son aquéllos por los que su riesgo de crédito no se ha incrementado significativamente desde su valuación inicial hasta la fecha de los estados financieros. * <strong>Etapa 2 - Riesgo de crédito con incremento o significativo</strong>: Son aquéllos que han mostrado un aumento significativo de riesgo de crédito desde su valuación inicial hasta la fecha de los estados financieros. * <strong>Etapa 3 - Riesgo de cŕedito alto o default</strong>: Son aquéllos con deterioro crediticio porque han ocurrido uno o más eventos que tienen un impacto perjudicial sobre los flujos de efectivo futuros del IFCPI. * Vector de Características (<span class="math inline">\(X\)</span>): Para cada cohorte <span class="math inline">\(i\)</span>, definimos un vector de entrada <span class="math inline">\(x^{(i)} \in \mathbb{R}^d\)</span>, donde <span class="math inline">\(d\)</span> es el número de dimensiones tras el preprocesamiento. Basados en nuestro EDA, este vector estará compuesto por las siguientes características: * Perfil del acreditado: <code>intervalo_edades</code>, <code>intervalo_ingreso_acreditado</code>, <code>sector_laboral</code> * Inmueble comercial: <code>estado</code>, <code>destino_credito</code>, <code>segmento_vivienda</code> * Estructura del cŕedito: <code>moneda</code> * Exposición financiera: <code>saldo_insoluto_final_periodo</code>, <code>tasa_ponderada</code></p>
+<p>Alineados al objetivo de gestión de riesgo de la NIFBdM C-16, definimos nuestro problema como una tarea de <strong>clasificación multiclase</strong>.</p>
+<ul>
+<li><p>Variable objetivo (<span class="math inline">\(Y\)</span>): <code>etapa</code>. Representa el nivel de deterioro del crédito. Definimos el espacio de etiquetas como <span class="math inline">\(Y \in \{1, 2, 3\}\)</span>, correspondientes a:</p>
+<ul>
+<li><strong>Etapa 1 - Riesgo de crédito bajo o normal</strong>: Son aquéllos por los que su riesgo de crédito no se ha incrementado significativamente desde su valuación inicial hasta la fecha de los estados financieros.</li>
+<li><strong>Etapa 2 - Riesgo de crédito con incremento o significativo</strong>: Son aquéllos que han mostrado un aumento significativo de riesgo de crédito desde su valuación inicial hasta la fecha de los estados financieros.</li>
+<li><strong>Etapa 3 - Riesgo de cŕedito alto o default</strong>: Son aquéllos con deterioro crediticio porque han ocurrido uno o más eventos que tienen un impacto perjudicial sobre los flujos de efectivo futuros del IFCPI.</li>
+</ul></li>
+<li><p>Vector de Características (<span class="math inline">\(X\)</span>): Para cada cohorte <span class="math inline">\(i\)</span>, definimos un vector de entrada <span class="math inline">\(x^{(i)} \in \mathbb{R}^d\)</span>, donde <span class="math inline">\(d\)</span> es el número de dimensiones tras el preprocesamiento. Basados en nuestro EDA, este vector estará compuesto por las siguientes características:</p>
+<ul>
+<li>Perfil del acreditado: <code>intervalo_edades</code>, <code>intervalo_ingreso_acreditado</code>, <code>sector_laboral</code></li>
+<li>Inmueble comercial: <code>estado</code>, <code>destino_credito</code>, <code>segmento_vivienda</code></li>
+<li>Estructura del cŕedito: <code>moneda</code></li>
+<li>Exposición financiera: <code>saldo_insoluto_final_periodo</code>, <code>tasa_ponderada</code></li>
+</ul></li>
+</ul>
 <p>El objetivo de nuestro modelo será aprender la función de mapeo <span class="math inline">\(f: X \rightarrow Y\)</span>, de tal forma que estime la distribución de probabilidad condicional <span class="math inline">\(P(Y=k \mid X=x^{(i)})\)</span> para cada clase <span class="math inline">\(k\)</span>.</p>
 </section>
 <section id="estrategia-de-evaluación-y-métricas-críticas" class="level2">
@@ -261,11 +276,22 @@ window.Quarto = {
 <p>La evaluación de clasificadores requiere un análisis riguroso. Como vimos en el EDA univariado, nuestro portafolio sufre de un fuerte desbalance de clases (la Etapa 1 concentra aproximadamente 81% de la muestra).</p>
 <section id="matriz-de-confusión-multiclase" class="level3">
 <h3 class="anchored" data-anchor-id="matriz-de-confusión-multiclase">Matriz de confusión multiclase</h3>
-<p>Sea la matriz de confusión <span class="math inline">\(C\)</span>, donde <span class="math inline">\(C_{i,j}\)</span> representa las observaciones de la clase verdadera <span class="math inline">\(i\)</span> predichas como la clase <span class="math inline">\(j\)</span>, es decir, que visto como un problema binario clase <span class="math inline">\(k\)</span> contra el resto de clases, tenemos que: <span class="math display">\[ N = \sum_{i} \sum_{j} C_{i,j} \quad ; \quad TP_k = C_{k,k} \quad ; \quad TN_k \sum_{i \neq k} \sum_{j \neq k} C_{i,j} \quad ; \quad FP_k = \sum_{i \neq k} C_{i,k} \quad ; \quad FN_k = \sum_{j \neq k} C_{k,j} \]</span> donde: * <span class="math inline">\(N\)</span>: Total de observaciones <!-- $ \quad \sum_{i} \sum_{j} C_{i,j} $ --> * <span class="math inline">\(TP_k\)</span>: Verdaderos Positivos <!-- $ \quad C_{k,k} $ --> * <span class="math inline">\(TN_k\)</span>: Verdaderos Negativos <!-- $ \quad \sum_{i \neq k} \sum_{j \neq k} C_{i,j} $ --> * <span class="math inline">\(FP_k\)</span>: Falsos Positivos <!-- $ \quad \sum_{i \neq k} C_{i,k} $ --> * <span class="math inline">\(FN_k\)</span>: Falsos Negativos <!-- $ \quad \sum_{j \neq k} C_{k,j} $ --> * <span class="math inline">\(k\)</span> como la clase positiva u objetivo</p>
+<p>Sea la matriz de confusión <span class="math inline">\(C\)</span>, donde <span class="math inline">\(C_{i,j}\)</span> representa las observaciones de la clase verdadera <span class="math inline">\(i\)</span> predichas como la clase <span class="math inline">\(j\)</span>, es decir, que visto como un problema binario clase <span class="math inline">\(k\)</span> contra el resto de clases, tenemos que:</p>
+<p><span class="math display">\[ N = \sum_{i} \sum_{j} C_{i,j} \quad ; \quad TP_k = C_{k,k} \quad ; \quad TN_k \sum_{i \neq k} \sum_{j \neq k} C_{i,j} \quad ; \quad FP_k = \sum_{i \neq k} C_{i,k} \quad ; \quad FN_k = \sum_{j \neq k} C_{k,j} \]</span></p>
+<p>donde:</p>
+<ul>
+<li><span class="math inline">\(N\)</span>: Total de observaciones <!-- $ \quad \sum_{i} \sum_{j} C_{i,j} $ --></li>
+<li><span class="math inline">\(TP_k\)</span>: Verdaderos Positivos <!-- $ \quad C_{k,k} $ --></li>
+<li><span class="math inline">\(TN_k\)</span>: Verdaderos Negativos <!-- $ \quad \sum_{i \neq k} \sum_{j \neq k} C_{i,j} $ --></li>
+<li><span class="math inline">\(FP_k\)</span>: Falsos Positivos <!-- $ \quad \sum_{i \neq k} C_{i,k} $ --></li>
+<li><span class="math inline">\(FN_k\)</span>: Falsos Negativos <!-- $ \quad \sum_{j \neq k} C_{k,j} $ --></li>
+<li><span class="math inline">\(k\)</span> como la clase positiva u objetivo</li>
+</ul>
 </section>
 <section id="accuracy" class="level3">
 <h3 class="anchored" data-anchor-id="accuracy">Accuracy</h3>
-<p>La exactitud o <em>Accuracy</em> se define como la proporción de predicciones correctas <span class="math inline">\(k\)</span> sobre el total de observaciones <span class="math inline">\(N\)</span>: <span class="math display">\[
+<p>La exactitud o <em>Accuracy</em> se define como la proporción de predicciones correctas <span class="math inline">\(k\)</span> sobre el total de observaciones <span class="math inline">\(N\)</span>:</p>
+<p><span class="math display">\[
 Accuracy_k = \frac{TP_k+TN_k}{N}
 \]</span></p>
 <p>Bajo nuestro contexto, un clasificador trivial que asigne <span class="math inline">\(k = 1\)</span> a todos los créditos obtendría un <span class="math inline">\(Accuracy \approx 0.81\)</span>. Sin embargo, esto seria catástrofico, porque como mencionamos, nuestro dataset sufre de un fuerte desbalance de clases en la variable objetivo. Además el costo de un Falso Negativo (clasificar una cartera altamenta riesgosa como uno de riesgo bajo) es muy superior al costo de un Falso Positivo (clasificar una cartera de riesgo bajo como una riesgosa).</p>
@@ -273,15 +299,27 @@ Accuracy_k = \frac{TP_k+TN_k}{N}
 </section>
 <section id="recall" class="level3">
 <h3 class="anchored" data-anchor-id="recall">Recall</h3>
-<p>Mide la capacidad del modelo para “encontrar” todos los casos de una clase específica. Será nuestra métrica principal a maximizar para las Etapas 2 y 3. <span class="math display">\[Recall_k = \frac{C_{k,k}}{\sum_{j} C_{k,j}} = \frac{TP_k}{TP_k + FN_k}\]</span></p>
+<p>Mide la capacidad del modelo para “encontrar” todos los casos de una clase específica. Será nuestra métrica principal a maximizar para las Etapas 2 y 3.</p>
+<p><span class="math display">\[Recall_k = \frac{C_{k,k}}{\sum_{j} C_{k,j}} = \frac{TP_k}{TP_k + FN_k}\]</span></p>
 </section>
 <section id="precision" class="level3">
 <h3 class="anchored" data-anchor-id="precision">Precision</h3>
-<p>Mide la confiabilidad de las alertas del modelo. De todos los créditos que el modelo etiquetó como <span class="math inline">\(k\)</span>, ¿cuántos lo eran realmente? <span class="math display">\[Precision_k = \frac{C_{k,k}}{\sum_{i} C_{i,k}} = \frac{TP_k}{TP_k + FP_k}\]</span></p>
+<p>Mide la confiabilidad de las alertas del modelo. De todos los créditos que el modelo etiquetó como <span class="math inline">\(k\)</span>, ¿cuántos lo eran realmente?</p>
+<p><span class="math display">\[Precision_k = \frac{C_{k,k}}{\sum_{i} C_{i,k}} = \frac{TP_k}{TP_k + FP_k}\]</span></p>
 </section>
 <section id="f1-score" class="level3">
 <h3 class="anchored" data-anchor-id="f1-score">F1-Score</h3>
-<p>Dado el trade-off natural entre Precision y Recall, utilizaremos la media armónica de ambas métricas para evaluar el balance del modelo. Esta métrica es conocida como F1-Score, muy útil en problemas con clases desbalanceadas. <span class="math display">\[F1 = 2 \frac{Precision \cdot Recall}{Precision + Recall}\]</span> En particular, para un problema multiclase con <span class="math inline">\(K\)</span> clases, calcularemos dos variantes: * <strong>Macro F1</strong>: Promedio no ponderado. Trata a todas las clases por igual, ideal para evaluar qué tan bien el modelo aprende las clases minoritarias. <span class="math display">\[F1_{macro} = \frac{1}{K} \sum_{k=1}^{K} 2 \frac{Precision_k \cdot Recall_k}{Precision_k + Recall_k}\]</span> * <strong>Weighted F1</strong>: Pondera el score de cada clase por su soporte o frecuencia real en la muestra (<span class="math inline">\(w_k\)</span>). <span class="math display">\[F1_{weighted} = \sum_{k=1}^{K} w_k \left( 2 \frac{Precision_k \cdot Recall_k}{Precision_k + Recall_k} \right)\]</span></p>
+<p>Dado el trade-off natural entre Precision y Recall, utilizaremos la media armónica de ambas métricas para evaluar el balance del modelo. Esta métrica es conocida como F1-Score, muy útil en problemas con clases desbalanceadas.</p>
+<p><span class="math display">\[F1 = 2 \frac{Precision \cdot Recall}{Precision + Recall}\]</span></p>
+<p>En particular, para un problema multiclase con <span class="math inline">\(K\)</span> clases, calcularemos dos variantes:</p>
+<ul>
+<li><strong>Macro F1</strong>: Promedio no ponderado. Trata a todas las clases por igual, ideal para evaluar qué tan bien el modelo aprende las clases minoritarias.</li>
+</ul>
+<p><span class="math display">\[F1_{macro} = \frac{1}{K} \sum_{k=1}^{K} 2 \frac{Precision_k \cdot Recall_k}{Precision_k + Recall_k}\]</span></p>
+<ul>
+<li><strong>Weighted F1</strong>: Pondera el score de cada clase por su soporte o frecuencia real en la muestra (<span class="math inline">\(w_k\)</span>).</li>
+</ul>
+<p><span class="math display">\[F1_{weighted} = \sum_{k=1}^{K} w_k \left( 2 \frac{Precision_k \cdot Recall_k}{Precision_k + Recall_k} \right)\]</span></p>
 <p>Adicionalmente, implementaremos la Curva ROC y el AUC (Área bajo la curva) para evaluar la capacidad de discriminación del modelo a través de distintos umbrales de probabilidad.</p>
 </section>
 </section>
@@ -294,12 +332,19 @@ Accuracy_k = \frac{TP_k+TN_k}{N}
 </section>
 <section id="transformación-de-características-normalización-y-codificación" class="level2">
 <h2 class="anchored" data-anchor-id="transformación-de-características-normalización-y-codificación">2.2. Transformación de características: Normalización y Codificación</h2>
-<p>Las redes neuronales optimizan sus pesos iterativamente utilizando el algoritmo de Descenso de Gradiente (Gradient Descent). Si las variables de entrada tienen magnitudes dispares (ej. una tasa del 10% vs.&nbsp;un saldo de $1,000,000 MXN), la superficie de la función de pérdida se vuelve alargada y el gradiente oscila ineficientemente, impidiendo la convergencia. Por lo que haremos las siguientes transformaciones: * Variables Numéricas: Aplicaremos un escalamiento robusto (RobustScaler). Como decidimos en la fase de EDA, nuestro dataset conserva valores atípicos severos. Este escalador sustrae la mediana y divide por el rango intercuartílico (IQR), haciéndolo matemáticamente resistente a la distorsión de los outliers. * Variables Categóricas: Aplicaremos codificación One-Hot, mapeando cada categoría a un vector binario ortogonal para evitar que la red asuma jerarquías o distancias falsas entre variables nominales como la moneda o el estado. * Variable Objetivo: Transformaremos las etiquetas de texto (“Etapa 1”, “Etapa 2”, “Etapa 3”) a índices enteros <span class="math inline">\((0, 1, 2)\)</span>, un requisito estricto para la función de pérdida categórica en PyTorch.</p>
+<p>Las redes neuronales optimizan sus pesos iterativamente utilizando el algoritmo de Descenso de Gradiente (Gradient Descent). Si las variables de entrada tienen magnitudes dispares (ej. una tasa del 10% vs.&nbsp;un saldo de $1,000,000 MXN), la superficie de la función de pérdida se vuelve alargada y el gradiente oscila ineficientemente, impidiendo la convergencia. Por lo que haremos las siguientes transformaciones:</p>
+<ul>
+<li>Variables Numéricas: Aplicaremos un escalamiento robusto (RobustScaler). Como decidimos en la fase de EDA, nuestro dataset conserva valores atípicos severos. Este escalador sustrae la mediana y divide por el rango intercuartílico (IQR), haciéndolo matemáticamente resistente a la distorsión de los outliers.</li>
+<li>Variables Categóricas: Aplicaremos codificación One-Hot, mapeando cada categoría a un vector binario ortogonal para evitar que la red asuma jerarquías o distancias falsas entre variables nominales como la moneda o el estado.</li>
+<li>Variable Objetivo: Transformaremos las etiquetas de texto (“Etapa 1”, “Etapa 2”, “Etapa 3”) a índices enteros <span class="math inline">\((0, 1, 2)\)</span>, un requisito estricto para la función de pérdida categórica en PyTorch.</li>
+</ul>
 <p>Cabe resaltar que todos los parámetros de transformación (medianas, IQRs, vocabularios) se ajustarán o aprenderán (<code>fit</code>) exclusivamente sobre el conjunto de entrenamiento. Posteriormente, se aplicarán (<code>transform</code>) a los datos de prueba.</p>
 </section>
 <section id="tratamiento-del-desbalance-de-clases" class="level2">
 <h2 class="anchored" data-anchor-id="tratamiento-del-desbalance-de-clases">2.3. Tratamiento del Desbalance de Clases</h2>
-<p>Abordaremos el desbalance desde la función de pérdida. Calcularemos un vector de pesos <span class="math inline">\(w\)</span> inversamente proporcional a las frecuencias de las clases en el conjunto de entrenamiento: <span class="math display">\[w_k = \frac{N}{K \cdot n_k}\]</span> donde <span class="math inline">\(N\)</span> es el total de observaciones, <span class="math inline">\(K\)</span> es el número de clases y <span class="math inline">\(n_k\)</span> es la frecuencia de la clase <span class="math inline">\(k\)</span>. Este peso se integrará más adelante en la función de Entropía, obligando a la red neuronal a pagar una penalización matemática mucho mayor si comete un error clasificando un crédito.</p>
+<p>Abordaremos el desbalance desde la función de pérdida. Calcularemos un vector de pesos <span class="math inline">\(w\)</span> inversamente proporcional a las frecuencias de las clases en el conjunto de entrenamiento:</p>
+<p><span class="math display">\[w_k = \frac{N}{K \cdot n_k}\]</span></p>
+<p>donde <span class="math inline">\(N\)</span> es el total de observaciones, <span class="math inline">\(K\)</span> es el número de clases y <span class="math inline">\(n_k\)</span> es la frecuencia de la clase <span class="math inline">\(k\)</span>. Este peso se integrará más adelante en la función de Entropía, obligando a la red neuronal a pagar una penalización matemática mucho mayor si comete un error clasificando un crédito.</p>
 <div id="142e0c70" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
@@ -414,7 +459,11 @@ Peso asignado para Etapa 2 (Índice 1): 3.0627
 Peso asignado para Etapa 3 (Índice 2): 4.1519</code></pre>
 </div>
 </div>
-<p>Esos resultados nos dan la siguiente información: * Dimensión de Entrada (<span class="math inline">\(d = 71\)</span>): La capa de entrada de nuestra futura Red Neuronal tendrá 71 neuronas. Suficientemente amplio para capturar la complejidad demográfica y financiera, pero lo suficientemente compacto para evitar problemas de memoria. * Pesos de Clase (<span class="math inline">\(w\)</span>): La interpretación matmética, es que el modelo penalizará aproximadamente 10 veces más (4.1519 vs 0.4111) un error en la Etapa 3 (cartera vencida) que en la Etapa 1 (cartera sana). Esto obligará a los algoritmos a prestar atención a la clase minoritaria.</p>
+<p>Esos resultados nos dan la siguiente información:</p>
+<ul>
+<li>Dimensión de Entrada (<span class="math inline">\(d = 71\)</span>): La capa de entrada de nuestra futura Red Neuronal tendrá 71 neuronas. Suficientemente amplio para capturar la complejidad demográfica y financiera, pero lo suficientemente compacto para evitar problemas de memoria.</li>
+<li>Pesos de Clase (<span class="math inline">\(w\)</span>): La interpretación matmética, es que el modelo penalizará aproximadamente 10 veces más (4.1519 vs 0.4111) un error en la Etapa 3 (cartera vencida) que en la Etapa 1 (cartera sana). Esto obligará a los algoritmos a prestar atención a la clase minoritaria.</li>
+</ul>
 </section>
 </section>
 <section id="línea-base-baseline-regresión-logística-multiclase" class="level1">
@@ -423,8 +472,10 @@ Peso asignado para Etapa 3 (Índice 2): 4.1519</code></pre>
 <section id="fundamentos-matemáticos" class="level2">
 <h2 class="anchored" data-anchor-id="fundamentos-matemáticos">3.1. Fundamentos Matemáticos</h2>
 <p>A diferencia de la regresión logística binaria clásica que utiliza la función Sigmoide, el enfoque multinomial generaliza la probabilidad para <span class="math inline">\(K\)</span> clases mutuamente excluyentes (en nuestro caso, <span class="math inline">\(K=3\)</span>).</p>
-<p>El modelo computa un puntaje o <em>logit</em> <span class="math inline">\(z_k\)</span> para cada clase <span class="math inline">\(k\)</span>, que es el resultado de una combinación lineal del vector de características <span class="math inline">\(X\)</span> (nuestras 71 columnas) y un vector de pesos específico para cada clase <span class="math inline">\(W_k\)</span>: <span class="math display">\[z_k = W_k^T X + b_k\]</span></p>
-<p>Posteriormente, estos puntajes se transforman en una distribución de probabilidades utilizando la función Softmax, asegurando que la suma de las probabilidades para todas las clases sea exactamente 1: <span class="math display">\[P(Y=k \mid X) = \frac{e^{z_k}}{\sum_{j=1}^{K} e^{z_j}}\]</span></p>
+<p>El modelo computa un puntaje o <em>logit</em> <span class="math inline">\(z_k\)</span> para cada clase <span class="math inline">\(k\)</span>, que es el resultado de una combinación lineal del vector de características <span class="math inline">\(X\)</span> (nuestras 71 columnas) y un vector de pesos específico para cada clase <span class="math inline">\(W_k\)</span>:</p>
+<p><span class="math display">\[z_k = W_k^T X + b_k\]</span></p>
+<p>Posteriormente, estos puntajes se transforman en una distribución de probabilidades utilizando la función Softmax, asegurando que la suma de las probabilidades para todas las clases sea exactamente 1:</p>
+<p><span class="math display">\[P(Y=k \mid X) = \frac{e^{z_k}}{\sum_{j=1}^{K} e^{z_j}}\]</span></p>
 <p>El modelo optimiza los pesos <span class="math inline">\(W\)</span> minimizando la función de pérdida de <strong>Entropía Cruzada Categórica</strong> (optimizada mediante algoritmos como L-BFGS o el descenso de gradiente), integrando los pesos compensatorios (<span class="math inline">\(w_k\)</span>) que calculamos previamente para equilibrar las clases.</p>
 </section>
 <section id="entrenamiento-y-evaluación-del-modelo-base" class="level2">
@@ -531,12 +582,83 @@ weighted avg       0.78      0.54      0.61    200000
 <p>Antes de adentrarnos en la programación del modelo, se justificará nuestras decisión de arquitectura y de framework. Para los modelos de aprendizaje automático, la elección de la herramienta debe adecuarse a la naturaleza de los datos y los objetivos del negocio.</p>
 <section id="redes-neuronales-sobre-otros-modelos-supervisados" class="level3">
 <h3 class="anchored" data-anchor-id="redes-neuronales-sobre-otros-modelos-supervisados">Redes Neuronales sobre otros modelos supervisados</h3>
-<p>A continuación, recordaremos la comparativa de los principales paradigmas de clasificación supervisada aplicables a este portafolio: | Familia de Algoritmos | Ejemplos | Ventajas | Limitaciones | | - | - | - | - | | Modelos Lineales | Regresión Logística, SVM (Kernel Lineal) | Alta interpretabilidad, bajo costo computacional, matemáticamente estables. | Incapaces de capturar relaciones no lineales sin ingeniería de características manual. Bajo rendimiento en problemas complejos. | | Ensambles de Árboles | Random Forest, XGBoost, LightGBM | Robustos ante valores atípicos y datos no escalados. Excelente rendimiento “fuera de la caja”. Capacidad de explicar la importancia de variables (SHAP). | Pueden sufrir para extrapolar fuera del dominio de entrenamiento. Consumen excesiva memoria RAM con matrices muy dispersas (One-Hot masivos). | | Aprendizaje Profundo | Red Neuronal Multicapa (MLP) | Aproximación Universal (pueden modelar cualquier función continua). Altamente escalables con GPU. Flexibilidad absoluta en la función de pérdida. | Requieren preprocesamiento estricto (escalamiento). Son “cajas negras” (baja interpretabilidad directa). Propensas al sobreajuste si hay pocos datos. |</p>
-<p>Tal como mencionamos al principio, hemos seleccionado una Red Neuronal Multicapa (MLP) por dos razones críticas del proyecto: * Volumen de Datos: El principal problema de las redes neuronales es el sobreajuste (overfitting) en muestras pequeñas. Sin embargo, con nuestra muestra de 800,000 registros de entrenamiento, tenemos la cantidad de datos adecuada para que la red neuronal generalice los patrones sin memorizar el ruido. * Complejidad del Riesgo: El riesgo crediticio es inherentemente no lineal. Una tasa del 15% puede ser segura para un empleado del sector público de 50 años, pero negativa para un joven del sector privado. Las capas ocultas del MLP y sus funciones de activación (como ReLU) están diseñadas matemáticamente para descubrir estas interacciones complejas de forma automática, algo que a la Regresión Logística le fue imposible lograr (como vimos en su bajo Recall).</p>
+<p>A continuación, recordaremos la comparativa de los principales paradigmas de clasificación supervisada aplicables a este portafolio:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Familia de Algoritmos</th>
+<th>Ejemplos</th>
+<th>Ventajas</th>
+<th>Limitaciones</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Modelos Lineales</td>
+<td>Regresión Logística, SVM (Kernel Lineal)</td>
+<td>Alta interpretabilidad, bajo costo computacional, matemáticamente estables.</td>
+<td>Incapaces de capturar relaciones no lineales sin ingeniería de características manual. Bajo rendimiento en problemas complejos.</td>
+</tr>
+<tr class="even">
+<td>Ensambles de Árboles</td>
+<td>Random Forest, XGBoost, LightGBM</td>
+<td>Robustos ante valores atípicos y datos no escalados. Excelente rendimiento “fuera de la caja”. Capacidad de explicar la importancia de variables (SHAP).</td>
+<td>Pueden sufrir para extrapolar fuera del dominio de entrenamiento. Consumen excesiva memoria RAM con matrices muy dispersas (One-Hot masivos).</td>
+</tr>
+<tr class="odd">
+<td>Aprendizaje Profundo</td>
+<td>Red Neuronal Multicapa (MLP)</td>
+<td>Aproximación Universal (pueden modelar cualquier función continua). Altamente escalables con GPU. Flexibilidad absoluta en la función de pérdida.</td>
+<td>Requieren preprocesamiento estricto (escalamiento). Son “cajas negras” (baja interpretabilidad directa). Propensas al sobreajuste si hay pocos datos.</td>
+</tr>
+</tbody>
+</table>
+<p>Tal como mencionamos al principio, hemos seleccionado una Red Neuronal Multicapa (MLP) por dos razones críticas del proyecto:</p>
+<ul>
+<li>Volumen de Datos: El principal problema de las redes neuronales es el sobreajuste (overfitting) en muestras pequeñas. Sin embargo, con nuestra muestra de 800,000 registros de entrenamiento, tenemos la cantidad de datos adecuada para que la red neuronal generalice los patrones sin memorizar el ruido.</li>
+<li>Complejidad del Riesgo: El riesgo crediticio es inherentemente no lineal. Una tasa del 15% puede ser segura para un empleado del sector público de 50 años, pero negativa para un joven del sector privado. Las capas ocultas del MLP y sus funciones de activación (como ReLU) están diseñadas matemáticamente para descubrir estas interacciones complejas de forma automática, algo que a la Regresión Logística le fue imposible lograr (como vimos en su bajo Recall).</li>
+</ul>
 </section>
 <section id="pytorch-sobre-otros-frameworks" class="level3">
 <h3 class="anchored" data-anchor-id="pytorch-sobre-otros-frameworks">PyTorch sobre otros frameworks</h3>
-<p>Para implementar la Red Neuronal, recordaremos la comparativa de los distintos frameworks conocidos: | Framework | Ventajas | Limitaciones | | - | - | - | | scikit-learn | Implementación sencilla (métodos .fit() y .predict()). Integración nativa con nuestros Pipelines de preprocesamiento. | No soporta aceleración por GPU. No permite personalizar la arquitectura interna, cambiar iteraciones del ciclo de entrenamiento, ni modificar a fondo la función de pérdida. | | JAX | Velocidad de ejecución insuperable gracias a su compilación XLA (Accelerated Linear Algebra). Ideal para investigación matemática pura y cálculo de gradientes a nivel microscópico. | Paradigma funcional estricto (no maneja estados mutables). Curva de aprendizaje muy pronunciada y ecosistema de capas neuronales (como Flax o Haiku) aún fragmentado. | | PyTorch | Grafo computacional dinámico. Paradigma Orientado a Objetos (clase nn.Module) muy intuitivo. Estándar en la industria. | Requiere escribir el ciclo de entrenamiento de forma manual paso a paso, lo que aumenta la cantidad de código. |</p>
+<p>Para implementar la Red Neuronal, recordaremos la comparativa de los distintos frameworks conocidos:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Framework</th>
+<th>Ventajas</th>
+<th>Limitaciones</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>scikit-learn</td>
+<td>Implementación sencilla (métodos .fit() y .predict()). Integración nativa con nuestros Pipelines de preprocesamiento.</td>
+<td>No soporta aceleración por GPU. No permite personalizar la arquitectura interna, cambiar iteraciones del ciclo de entrenamiento, ni modificar a fondo la función de pérdida.</td>
+</tr>
+<tr class="even">
+<td>JAX</td>
+<td>Velocidad de ejecución insuperable gracias a su compilación XLA (Accelerated Linear Algebra). Ideal para investigación matemática pura y cálculo de gradientes a nivel microscópico.</td>
+<td>Paradigma funcional estricto (no maneja estados mutables). Curva de aprendizaje muy pronunciada y ecosistema de capas neuronales (como Flax o Haiku) aún fragmentado.</td>
+</tr>
+<tr class="odd">
+<td>PyTorch</td>
+<td>Grafo computacional dinámico. Paradigma Orientado a Objetos (clase nn.Module) muy intuitivo. Estándar en la industria.</td>
+<td>Requiere escribir el ciclo de entrenamiento de forma manual paso a paso, lo que aumenta la cantidad de código.</td>
+</tr>
+</tbody>
+</table>
 <p>Se elige PyTorch por ofrecer un equilibrio entre control absoluto y legibilidad. A diferencia de scikit-learn, PyTorch nos permite acelerar el entrenamiento utilizando GPUs (útil para nuestro dataset de 800k filas <span class="math inline">\(\times\)</span> 71 columnas) e integrar nuestros pesos de clase personalizados directamente en el cálculo del tensor de costo (CrossEntropyLoss). Aunque JAX es más rápido teóricamente, el diseño orientado a objetos de PyTorch hace que el código sea mucho más estructurado y comprensible.</p>
 </section>
 </section>
@@ -601,7 +723,11 @@ Proporción en Val:   8.03%</code></pre>
 <section id="tensores-y-preparación-de-datos-dataloaders" class="level2">
 <h2 class="anchored" data-anchor-id="tensores-y-preparación-de-datos-dataloaders">4.3. Tensores y Preparación de Datos (DataLoaders)</h2>
 <p>El bloque de construcción fundamental en PyTorch es el Tensor (una matriz multidimensional optimizada para cálculos en paralelo, típicamente ejecutada en tarjetas gráficas o GPUs). Para entrenar nuestra Red Neuronal, no le pasaremos los 640,000 registros de entrenamiento de golpe, ya que esto saturaría la memoria de video (VRAM) y haría que el descenso de gradiente fuera ineficiente.</p>
-<p>En su lugar, utilizaremos el concepto de Mini-Batch Gradient Descent. Empaquetaremos nuestros datos en lotes (batches) para procesarlos paulatinamente; por ejemplo, de 1024 registros a la vez. PyTorch gestiona esta carga de memoria a través de dos clases fundamentales: 1. <code>TensorDataset</code>: Empareja nuestra matriz de características <span class="math inline">\(X\)</span> con sus respectivas etiquetas <span class="math inline">\(Y\)</span>. 2. <code>DataLoader</code>: Un iterador que mezcla los datos aleatoriamente (<code>shuffle=True</code>) y los sirve en lotes predefinidos durante cada iteración del entrenamiento.</p>
+<p>En su lugar, utilizaremos el concepto de Mini-Batch Gradient Descent. Empaquetaremos nuestros datos en lotes (batches) para procesarlos paulatinamente; por ejemplo, de 1024 registros a la vez. PyTorch gestiona esta carga de memoria a través de dos clases fundamentales:</p>
+<ol type="1">
+<li><code>TensorDataset</code>: Empareja nuestra matriz de características <span class="math inline">\(X\)</span> con sus respectivas etiquetas <span class="math inline">\(Y\)</span>.</li>
+<li><code>DataLoader</code>: Un iterador que mezcla los datos aleatoriamente (<code>shuffle=True</code>) y los sirve en lotes predefinidos durante cada iteración del entrenamiento.</li>
+</ol>
 <p>A continuación, convertiremos nuestras matrices de NumPy a tensores nativos de PyTorch, creando los iteradores para nuestros tres subconjuntos: Entrenamiento, Validación y Prueba. Además, configuraremos la detección dinámica del dispositivo de cómputo (CPU o GPU) para garantizar la portabilidad del código y máxima velocidad de ejecución.</p>
 <div id="bec2bec5" class="cell" data-execution_count="5">
 <details class="code-fold">
@@ -689,7 +815,13 @@ Número de lotes (batches) por iteración:
 </section>
 <section id="arquitectura-de-la-red" class="level2">
 <h2 class="anchored" data-anchor-id="arquitectura-de-la-red">4.4. Arquitectura de la Red</h2>
-<p>En PyTorch, las redes neuronales se construyen mediante la Programación Orientada a Objetos, heredando de la clase base <code>nn.Module</code>. Esta arquitectura será un Perceptrón Multicapa (MLP) profundo, diseñado para capturar la no linealidad del riesgo crediticio: * Capa de Entrada: Recibirá un vector <span class="math inline">\(x \in \mathbb{R}^{71}\)</span>. * Capas Ocultas: Implementaremos dos capas. Para permitir que la red aprenda funciones complejas, aplicaremos el estándar que es la función de activación no lineal ReLU (Rectified Linear Unit), definida como <span class="math inline">\(f(x) = \max(0, x)\)</span>, porque previene el problema del desvanecimiento del gradiente. * Regularización (Dropout): Para evitar que nuestra red memorice los registros y evitar el sobreajuste, aplicaremos la técnica de regularizacion Dropout. Durante el entrenamiento, estas capas “apagarán” aleatoriamente un porcentaje de neuronas (ej. 30%), obligando a la red a distribuir el aprendizaje y volverse robusta. * Capa de Salida: Una capa lineal que proyectará la información a un vector de 3 dimensiones (las 3 etapas de riesgo).</p>
+<p>En PyTorch, las redes neuronales se construyen mediante la Programación Orientada a Objetos, heredando de la clase base <code>nn.Module</code>. Esta arquitectura será un Perceptrón Multicapa (MLP) profundo, diseñado para capturar la no linealidad del riesgo crediticio:</p>
+<ul>
+<li>Capa de Entrada: Recibirá un vector <span class="math inline">\(x \in \mathbb{R}^{71}\)</span>.</li>
+<li>Capas Ocultas: Implementaremos dos capas. Para permitir que la red aprenda funciones complejas, aplicaremos el estándar que es la función de activación no lineal ReLU (Rectified Linear Unit), definida como <span class="math inline">\(f(x) = \max(0, x)\)</span>, porque previene el problema del desvanecimiento del gradiente.</li>
+<li>Regularización (Dropout): Para evitar que nuestra red memorice los registros y evitar el sobreajuste, aplicaremos la técnica de regularizacion Dropout. Durante el entrenamiento, estas capas “apagarán” aleatoriamente un porcentaje de neuronas (ej. 30%), obligando a la red a distribuir el aprendizaje y volverse robusta.</li>
+<li>Capa de Salida: Una capa lineal que proyectará la información a un vector de 3 dimensiones (las 3 etapas de riesgo).</li>
+</ul>
 <p>No aplicaremos explícitamente la función Softmax en esta capa, ya que PyTorch optimiza el cálculo numérico combinando <code>LogSoftmax</code> y la Pérdida de Logaritmo Negativo en una sola función matemática (<code>CrossEntropyLoss</code>).</p>
 </section>
 <section id="función-de-pérdida-y-optimizador" class="level2">
@@ -792,7 +924,7 @@ Optimizador: Adam (lr=0.001)</code></pre>
 <h2 class="anchored" data-anchor-id="ciclo-de-entrenamiento">4.6. Ciclo de Entrenamiento</h2>
 <p>A diferencia de scikit-learn, PyTorch requiere que programemos el algoritmo de entrenamiento explícitamente. Por cada “época” (una iteración completa sobre todos los datos), ejecutaremos dos fases fundamentales:</p>
 <ol type="1">
-<li><strong>Fase de Entrenamiento</strong>: Ejecutaremos los siguientes pasos matemáticos por cada lote (batch) de 1024 registros:
+<li><p><strong>Fase de Entrenamiento</strong>: Ejecutaremos los siguientes pasos matemáticos por cada lote (batch) de 1024 registros:</p>
 <ul>
 <li>Limpiar los gradientes de la iteración anterior (<code>zero_grad()</code>).</li>
 <li>Forward Pass: Pasar los datos por la red para obtener predicciones.</li>
@@ -800,7 +932,7 @@ Optimizador: Adam (lr=0.001)</code></pre>
 <li>Backward Pass: Calcular las derivadas parciales del error respecto a cada peso mediante la regla de la cadena matemática (<code>backward()</code>).</li>
 <li>Actualizar los pesos moviéndolos en la dirección opuesta al gradiente (<code>step()</code>).</li>
 </ul></li>
-<li><strong>Fase de Validación</strong>: Al final de cada época, la red dejará de aprender temporalmente. Desactivaremos el motor de gradientes (<code>torch.no_grad()</code>) y las capas de regularización como el Dropout (<code>eval()</code>) para evaluar el modelo sobre los 160,000 registros de nuestro conjunto de validación.</li>
+<li><p><strong>Fase de Validación</strong>: Al final de cada época, la red dejará de aprender temporalmente. Desactivaremos el motor de gradientes (<code>torch.no_grad()</code>) y las capas de regularización como el Dropout (<code>eval()</code>) para evaluar el modelo sobre los 160,000 registros de nuestro conjunto de validación.</p></li>
 </ol>
 <p>Monitorear simultáneamente la pérdida de entrenamiento (Train Loss) y la pérdida de validación (Val Loss) nos permitirá observar la verdadera capacidad de generalización del modelo. Si la pérdida de entrenamiento baja pero la de validación se estanca o sube, sabremos de inmediato que la red está memorizando el ruido (sobreajuste).</p>
 <div id="e0a667a8" class="cell" data-execution_count="7">

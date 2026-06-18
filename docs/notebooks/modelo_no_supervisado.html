@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>1. Definición del Problema y Enfoque Analítico – Riesgo Crediticio - Minería de Datos</title>
+<title>1. Definición del Problema y Enfoque Analítico – Almacenes y Minería de Datos: Proyecto Final</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -149,7 +149,7 @@ window.Quarto = {
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="../index.html">
-    <span class="navbar-title">Riesgo Crediticio - Minería de Datos</span>
+    <span class="navbar-title">Almacenes y Minería de Datos: Proyecto Final</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
@@ -159,7 +159,7 @@ window.Quarto = {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../index.qmd"> 
+    <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Inicio</span></a>
   </li>  
   <li class="nav-item">
@@ -267,7 +267,12 @@ window.Quarto = {
 <section id="selección-de-variables" class="level2">
 <h2 class="anchored" data-anchor-id="selección-de-variables">2.2. Selección de Variables</h2>
 <p>El agrupamiento es altamente sensible al “ruido” y a la maldición de la dimensionalidad. Incluir variables irrelevantes o constantes diluye la noción de distancia, haciendo que todos los clientes parezcan equidistantes. Por ello, eliminaremos la variable <code>etapa</code>, que ahora se convierto una constante (ya que solo nos centramos en los valores de Etapa 3) y conservaremos las 9 dimensiones restantes de nuestro EDA.</p>
-<p>Estas dimensiones nos permitirán construir los perfiles de morosidad: * <strong>Variables demográficas:</strong> <code>intervalo_edades</code>, <code>intervalo_ingreso_acreditado</code>, <code>sector_laboral</code>. * <strong>Variables del producto:</strong> <code>estado</code>, <code>destino_credito</code>, <code>segmento_vivienda</code>, <code>moneda</code>. * <strong>Variables financieras:</strong> <code>saldo_insoluto_final_periodo</code>, <code>tasa_ponderada</code>.</p>
+<p>Estas dimensiones nos permitirán construir los perfiles de morosidad:</p>
+<ul>
+<li><strong>Variables demográficas:</strong> <code>intervalo_edades</code>, <code>intervalo_ingreso_acreditado</code>, <code>sector_laboral</code>.</li>
+<li><strong>Variables del producto:</strong> <code>estado</code>, <code>destino_credito</code>, <code>segmento_vivienda</code>, <code>moneda</code>.</li>
+<li><strong>Variables financieras:</strong> <code>saldo_insoluto_final_periodo</code>, <code>tasa_ponderada</code>.</li>
+</ul>
 </section>
 <section id="tratamiento-de-datos-mixtos" class="level2">
 <h2 class="anchored" data-anchor-id="tratamiento-de-datos-mixtos">2.3. Tratamiento de Datos Mixtos</h2>
@@ -451,10 +456,17 @@ Primeras observaciones:</code></pre>
 <p>Una vez definida nuestra muestra de 10,000 registros de la cartera vencida, el siguiente paso es seleccionar la métrica matemática para evaluar la “similitud” entre los clientes y el algoritmo que utilizará dicha métrica para conformar los grupos. Una medida de distancia errónea puede invalidar los resultados del algoritmo.</p>
 <section id="justificación-de-la-métrica-distancia-de-gower" class="level2">
 <h2 class="anchored" data-anchor-id="justificación-de-la-métrica-distancia-de-gower">3.1. Justificación de la Métrica: Distancia de Gower</h2>
-<p>El estándar para medir similitud es la <strong>Distancia Euclidiana</strong>, definida como la longitud del segmento de recta que conecta dos puntos en un espacio Euclidiano: <span class="math display">\[d(p, q) = \sqrt{\sum_{i=1}^{n} (q_i - p_i)^2}\]</span></p>
+<p>El estándar para medir similitud es la <strong>Distancia Euclidiana</strong>, definida como la longitud del segmento de recta que conecta dos puntos en un espacio Euclidiano:</p>
+<p><span class="math display">\[d(p, q) = \sqrt{\sum_{i=1}^{n} (q_i - p_i)^2}\]</span></p>
 <p>Sin embargo, esta métrica asume estrictamente que todas las dimensiones son ortogonales y numéricas continuas. Nuestro vector de características es mixto. Como establecimos antes, para resolver este problema sin alterar la naturaleza de los datos, utilizaremos la <strong>Distancia de Gower</strong>. Esta métrica fue diseñada específicamente para calcular la proximidad en conjuntos de datos mixtos. Funciona calculando una similitud parcial para cada variable dependiendo de su tipo, y luego promediándolas.</p>
-<p>Matemáticamente, la similitud de Gower <span class="math inline">\(S_{ij}\)</span> entre dos observaciones <span class="math inline">\(i\)</span> y <span class="math inline">\(j\)</span> se define como: <span class="math display">\[S_{ij} = \frac{\sum_{k=1}^{p} w_{ijk} s_{ijk}}{\sum_{k=1}^{p} w_{ijk}}\]</span></p>
-<p>Donde para cada característica <span class="math inline">\(k\)</span>: * <strong>Si <span class="math inline">\(k\)</span> es cuantitativa (ej. <code>saldo_insoluto_final_periodo</code>):</strong> La similitud parcial es <span class="math inline">\(s_{ijk} = 1 - \frac{|x_{ik} - x_{jk}|}{R_k}\)</span>, siendo <span class="math inline">\(R_k\)</span> el rango máximo observado de esa variable. Esto estandariza automáticamente el efecto de los montos millonarios. * <strong>Si <span class="math inline">\(k\)</span> es cualitativa nominal (ej. <code>estado</code>, <code>destino_credito</code>):</strong> La similitud parcial es binaria: <span class="math inline">\(s_{ijk} = 1\)</span> si las categorías son idénticas, y <span class="math inline">\(s_{ijk} = 0\)</span> si son diferentes. * <span class="math inline">\(w_{ijk}\)</span> es un indicador de validez (usualmente 1, a menos que existan valores faltantes, en cuyo caso es 0).</p>
+<p>Matemáticamente, la similitud de Gower <span class="math inline">\(S_{ij}\)</span> entre dos observaciones <span class="math inline">\(i\)</span> y <span class="math inline">\(j\)</span> se define como:</p>
+<p><span class="math display">\[S_{ij} = \frac{\sum_{k=1}^{p} w_{ijk} s_{ijk}}{\sum_{k=1}^{p} w_{ijk}}\]</span></p>
+<p>Donde para cada característica <span class="math inline">\(k\)</span>:</p>
+<ul>
+<li><strong>Si <span class="math inline">\(k\)</span> es cuantitativa (ej. <code>saldo_insoluto_final_periodo</code>):</strong> La similitud parcial es <span class="math inline">\(s_{ijk} = 1 - \frac{|x_{ik} - x_{jk}|}{R_k}\)</span>, siendo <span class="math inline">\(R_k\)</span> el rango máximo observado de esa variable. Esto estandariza automáticamente el efecto de los montos millonarios.</li>
+<li><strong>Si <span class="math inline">\(k\)</span> es cualitativa nominal (ej. <code>estado</code>, <code>destino_credito</code>):</strong> La similitud parcial es binaria: <span class="math inline">\(s_{ijk} = 1\)</span> si las categorías son idénticas, y <span class="math inline">\(s_{ijk} = 0\)</span> si son diferentes.</li>
+<li><span class="math inline">\(w_{ijk}\)</span> es un indicador de validez (usualmente 1, a menos que existan valores faltantes, en cuyo caso es 0).</li>
+</ul>
 <p>Finalmente, la distancia se obtiene restando la similitud a 1: <span class="math inline">\(d(i, j) = 1 - S_{ij}\)</span>. El resultado es una matriz donde cada valor está acotado estrictamente entre 0 (clientes idénticos) y 1 (clientes diametralmente opuestos), ofreciendo una representación geométrica perfecta de nuestra cartera.</p>
 </section>
 <section id="justificación-del-algoritmo-pam-k-medoids" class="level2">
@@ -502,7 +514,11 @@ Primeras observaciones:</code></pre>
 </tbody>
 </table>
 <p><strong>Decisión:</strong> Seleccionamos el algoritmo <strong>PAM (Partitioning Around Medoids)</strong>. A diferencia de K-Means, que intenta minimizar la suma de errores cuadráticos, PAM busca encontrar un conjunto de <span class="math inline">\(K\)</span> observaciones representativas (medoides) dentro del dataset, minimizando la suma de distancias absolutas a los puntos de su grupo.</p>
-<p>Esta decisión nos otorga dos ventajas para el sector financiero: 1. <strong>Robustez ante extremos:</strong> Como demostramos en la Sección 6 del EDA, nuestra base de datos posee valores atípicos reales y masivos en el monto y saldo de los créditos. PAM no eleva estas distancias al cuadrado, por lo que los créditos atípicos no distorsionan la estructura general del grupo. 2. <strong>Interpretabilidad total:</strong> El medoide resultante no será una abstracción matemática incomprensible; será una fila real de nuestro DataFrame. Podremos detectar claramente a los clientes en el centro del clúster: <em>“El clúster/perfil 1 de morosidad se comporta exactamente como este cliente real: 45 años, sector privado, en Jalisco, con deuda de $1.2M MXN”</em>.</p>
+<p>Esta decisión nos otorga dos ventajas para el sector financiero:</p>
+<ol type="1">
+<li><strong>Robustez ante extremos:</strong> Como demostramos en la Sección 6 del EDA, nuestra base de datos posee valores atípicos reales y masivos en el monto y saldo de los créditos. PAM no eleva estas distancias al cuadrado, por lo que los créditos atípicos no distorsionan la estructura general del grupo.</li>
+<li><strong>Interpretabilidad total:</strong> El medoide resultante no será una abstracción matemática incomprensible; será una fila real de nuestro DataFrame. Podremos detectar claramente a los clientes en el centro del clúster: <em>“El clúster/perfil 1 de morosidad se comporta exactamente como este cliente real: 45 años, sector privado, en Jalisco, con deuda de $1.2M MXN”</em>.</li>
+</ol>
 <p>En el siguiente capítulo, calcularemos esta matriz de distancias y utilizaremos un criterio de validación interna para descubrir el número óptimo de estos perfiles (<span class="math inline">\(K\)</span>) presentes en la cartera vencida.</p>
 </section>
 </section>
@@ -513,7 +529,12 @@ Primeras observaciones:</code></pre>
 <h2 class="anchored" data-anchor-id="cálculo-de-la-matriz-de-distancias">4.1. Cálculo de la Matriz de Distancias</h2>
 <p>Antes de poder iterar y evaluar diferentes valores de <span class="math inline">\(K\)</span>, necesitamos construir el espacio métrico sobre el cual operará nuestro algoritmo. Como justificamos matemáticamente en la sección anterior, utilizaremos la métrica de Gower.</p>
 <p>El proceso computacional evaluará nuestros 10,000 registros, cruzando cada cliente contra el resto de la muestra para calcular su nivel de disimilitud basándose en las 9 variables de nuestro vector de características. El resultado será una matriz cuadrada simétrica de dimensiones <span class="math inline">\(10,000 \times 10,000\)</span>.</p>
-<p>En esta matriz bidimensional: * La diagonal principal estará compuesta estrictamente por ceros (la distancia de un cliente consigo mismo es nula). * Un valor cercano a <span class="math inline">\(0\)</span> indicará que dos créditos en mora comparten características demográficas, estructurales y financieras casi idénticas. * Un valor cercano a <span class="math inline">\(1\)</span> indicará que los perfiles son diametralmente opuestos (por ejemplo, un joven con un crédito de interés social vs.&nbsp;un adulto mayor con un crédito residencial de alto valor).</p>
+<p>En esta matriz bidimensional:</p>
+<ul>
+<li>La diagonal principal estará compuesta estrictamente por ceros (la distancia de un cliente consigo mismo es nula).</li>
+<li>Un valor cercano a <span class="math inline">\(0\)</span> indicará que dos créditos en mora comparten características demográficas, estructurales y financieras casi idénticas.</li>
+<li>Un valor cercano a <span class="math inline">\(1\)</span> indicará que los perfiles son diametralmente opuestos (por ejemplo, un joven con un crédito de interés social vs.&nbsp;un adulto mayor con un crédito residencial de alto valor).</li>
+</ul>
 <p>Esta matriz precomputada actuará como el motor que alimentará de manera eficiente tanto a las métricas de validación interna (como el Coeficiente de Silueta) como al algoritmo de particionamiento (PAM) en las siguientes etapas.</p>
 <div id="a881507b" class="cell" data-execution_count="3">
 <details class="code-fold">
@@ -574,8 +595,13 @@ Vista previa de la matriz de distancias (5x5 clientes):
 <h2 class="anchored" data-anchor-id="análisis-del-coeficiente-de-silueta">4.2. Análisis del Coeficiente de Silueta</h2>
 <p>Con nuestra matriz de distancias precomputada, el algoritmo PAM está listo para buscar los medoides óptimos. Sin embargo, antes de realizar la partición final, debemos determinar el hiperparámetro <span class="math inline">\(K\)</span> (el número de clústeres).</p>
 <p>A diferencia de K-Means, donde suele utilizarse el “Método del Codo” , este no es adecuado matemáticamente cuando utilizamos distancias no Euclidianas como Gower. Pero en su lugar, utilizaremos el <strong>Coeficiente de Silueta</strong> (Silhouette Score), una métrica de validación más robusta.</p>
-<p>El Coeficiente de Silueta evalúa simultáneamente dos propiedades fundamentales de un buen agrupamiento: 1. <strong>Cohesión (<span class="math inline">\(a\)</span>):</strong> Qué tan cerca está un cliente de los demás miembros de su <em>mismo</em> clúster. 2. <strong>Separación (<span class="math inline">\(b\)</span>):</strong> Qué tan lejos está un cliente de los miembros del clúster vecino más cercano.</p>
-<p>Para un cliente <span class="math inline">\(i\)</span>, su coeficiente se calcula como: <span class="math display">\[s(i) = \frac{b(i) - a(i)}{\max\{a(i), b(i)\}}\]</span></p>
+<p>El Coeficiente de Silueta evalúa simultáneamente dos propiedades fundamentales de un buen agrupamiento:</p>
+<ol type="1">
+<li><strong>Cohesión (<span class="math inline">\(a\)</span>):</strong> Qué tan cerca está un cliente de los demás miembros de su <em>mismo</em> clúster.</li>
+<li><strong>Separación (<span class="math inline">\(b\)</span>):</strong> Qué tan lejos está un cliente de los miembros del clúster vecino más cercano.</li>
+</ol>
+<p>Para un cliente <span class="math inline">\(i\)</span>, su coeficiente se calcula como:</p>
+<p><span class="math display">\[s(i) = \frac{b(i) - a(i)}{\max\{a(i), b(i)\}}\]</span></p>
 <p>El valor de <span class="math inline">\(s(i)\)</span> oscila entre -1 y 1. Un valor cercano a 1 indica que el cliente está perfectamente asignado a su clúster y muy lejos del clúster vecino; un valor de 0 indica que el cliente está justo en la frontera de decisión; y un valor negativo indica que fue asignado al clúster equivocado.</p>
 <p>Para evaluar el número óptimo de grupos, calcularemos el Coeficiente de Silueta promedio para toda la muestra iterando diferentes valores de <span class="math inline">\(K\)</span> (por ejemplo, desde <span class="math inline">\(K=2\)</span> hasta <span class="math inline">\(K=6\)</span>). Buscaremos el valor de <span class="math inline">\(K\)</span> que maximice este coeficiente, asegurándonos también de que el número de grupos tenga sentido estratégico para el negocio (usualmente entre 3 y 5 perfiles para que las áreas de cobranza o crédito puedan diseñar productos accionables).</p>
 <div id="e8826c2e" class="cell">
@@ -840,7 +866,11 @@ RADIOGRAFÍA DEMOGRÁFICA: EDAD VS INGRESO POR CLÚSTER
 </div>
 </div>
 </div>
-<p><strong>Interpretación</strong>: Aunque el Stripplot cumple su función de mostrarnos que hay 10,000 observaciones ahí (y no solo 30 puntos apilados), visualmente sigue siendo poco interpretable. Sin embargo, si observamos de manera con cuidado podemos ver que los colores de cada clúster pueden agruparse en ciertas partes de la cuadricula, dandonos una idea inicial de los perfiles: * La Nube Azul (Clúster 0), se concentra fuertemente en el un vector de y “36-45” años, con ingresos que van desde “20,001 - 40,000” hasta “Más de 150,000”. * La Nube Naranja (Clúster 1), empieza a dominar conforme nos movemos hacia la derecha y hacia arriba. En particular para el sector de “46-55” y “56-65” años con ingresos de “1,000 - 10,000” y “10,001 y 20,000”.</p>
+<p><strong>Interpretación</strong>: Aunque el Stripplot cumple su función de mostrarnos que hay 10,000 observaciones ahí (y no solo 30 puntos apilados), visualmente sigue siendo poco interpretable. Sin embargo, si observamos de manera con cuidado podemos ver que los colores de cada clúster pueden agruparse en ciertas partes de la cuadricula, dandonos una idea inicial de los perfiles:</p>
+<ul>
+<li>La Nube Azul (Clúster 0), se concentra fuertemente en el un vector de y “36-45” años, con ingresos que van desde “20,001 - 40,000” hasta “Más de 150,000”.</li>
+<li>La Nube Naranja (Clúster 1), empieza a dominar conforme nos movemos hacia la derecha y hacia arriba. En particular para el sector de “46-55” y “56-65” años con ingresos de “1,000 - 10,000” y “10,001 y 20,000”.</li>
+</ul>
 <p>Para eliminar esta ambigüedad visual y convertir esta gráfica en algo más interpretable, pasaremos a otra herramienta estadística más útil para conteos categóricos: el Gráfico de Barras Agrupadas.</p>
 </section>
 <section id="visualización-de-perfiles-gráficos-de-barras-agrupadas" class="level2">
