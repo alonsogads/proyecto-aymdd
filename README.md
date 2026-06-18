@@ -2,7 +2,9 @@
 Repositorio del Proyecto: **Riesgo y Deterioro de la Cartera de la Vivienda**
 
 Universidad Nacional Autónoma de México
+
 Facultad de Ciencias
+
 Almacenes y Minería de Datos
 
 * **Alumno:** Gustavo Alonso Domínguez Sánchez - 418047121
@@ -33,13 +35,13 @@ El proyecto abandona la dependencia exclusiva de cuadernos de experimentación p
 
 La estructura de directorios es la siguiente:
 
-- data/: Tabla de hechos crudo (instrucciones de descarga) y catálogos dimensionales.
-- docs/: Sitio Quarto compilado (GitHub Pages)
-- models/: Artefactos y modelos serializados generados por el sistema (.pth para PyTorch, .joblib para Scikit-Learn).
-- notebooks/: Jupyter Notebooks de EDA, modelado y clustering.
-- reports/: Documentación técnica en formato LaTeX y PDF (Reporte Final).
-- src/: Código fuente de producción para la ingesta, entrenamiento e inferencia en tiempo real.
-- diagrams/: Diagrama UML de la arquitectura del código de producción
+- `data/`: Tabla de hechos crudo (instrucciones de descarga) y catálogos dimensionales.
+- `docs/`: Sitio Quarto compilado (GitHub Pages)
+- `models/`: Artefactos y modelos serializados generados por el sistema (.pth para PyTorch, .joblib para Scikit-Learn).
+- `notebooks/`: Jupyter Notebooks de EDA, modelado y clustering.
+- `reports/`: Documentación técnica en formato LaTeX y PDF (Reporte Final).
+- `src/`: Código fuente de producción para la ingesta, entrenamiento e inferencia en tiempo real.
+- `diagrams/`: Diagrama UML de la arquitectura del código de producción
 
 ## Configuración del Entorno Virtual (Environment)
 
