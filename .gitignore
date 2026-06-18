@@ -34,3 +34,6 @@ Thumbs.db
 *.fdb_latexmk
 *.run.xml
 *.bcf
+
+/.quarto/
+**/*.quarto_ipynb

@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>1. Definición del Problema y Enfoque Analítico – Riesgo Crediticio - Minería de Datos</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-dea667461a5c81afc9ba75ce94cd63f3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Riesgo Crediticio - Minería de Datos</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.qmd"> 
+<span class="menu-text">Inicio</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notebooks/EDA.html"> 
+<span class="menu-text">Análisis Exploratorio de Datos</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notebooks/modelo_supervisado.html"> 
+<span class="menu-text">Modelo Supervisado</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="../notebooks/modelo_no_supervisado.html" aria-current="page"> 
+<span class="menu-text">Clustering</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#enfoque-estratégico-perfiles-de-morosidad" id="toc-enfoque-estratégico-perfiles-de-morosidad" class="nav-link active" data-scroll-target="#enfoque-estratégico-perfiles-de-morosidad">1.1. Enfoque estratégico: Perfiles de Morosidad</a></li>
+  <li><a href="#selección-y-preprocesamiento-de-datos" id="toc-selección-y-preprocesamiento-de-datos" class="nav-link" data-scroll-target="#selección-y-preprocesamiento-de-datos">2. Selección y Preprocesamiento de Datos</a>
+  <ul class="collapse">
+  <li><a href="#filtrado-y-muestreo-aleatorio" id="toc-filtrado-y-muestreo-aleatorio" class="nav-link" data-scroll-target="#filtrado-y-muestreo-aleatorio">2.1. Filtrado y Muestreo Aleatorio</a></li>
+  <li><a href="#selección-de-variables" id="toc-selección-de-variables" class="nav-link" data-scroll-target="#selección-de-variables">2.2. Selección de Variables</a></li>
+  <li><a href="#tratamiento-de-datos-mixtos" id="toc-tratamiento-de-datos-mixtos" class="nav-link" data-scroll-target="#tratamiento-de-datos-mixtos">2.3. Tratamiento de Datos Mixtos</a></li>
+  </ul></li>
+  <li><a href="#estrategia-de-agrupamiento-pam-y-distancia-de-gower" id="toc-estrategia-de-agrupamiento-pam-y-distancia-de-gower" class="nav-link" data-scroll-target="#estrategia-de-agrupamiento-pam-y-distancia-de-gower">3. Estrategia de Agrupamiento: PAM y Distancia de Gower</a>
+  <ul class="collapse">
+  <li><a href="#justificación-de-la-métrica-distancia-de-gower" id="toc-justificación-de-la-métrica-distancia-de-gower" class="nav-link" data-scroll-target="#justificación-de-la-métrica-distancia-de-gower">3.1. Justificación de la Métrica: Distancia de Gower</a></li>
+  <li><a href="#justificación-del-algoritmo-pam-k-medoids" id="toc-justificación-del-algoritmo-pam-k-medoids" class="nav-link" data-scroll-target="#justificación-del-algoritmo-pam-k-medoids">3.2. Justificación del Algoritmo: PAM (K-Medoids)</a></li>
+  </ul></li>
+  <li><a href="#determinación-del-número-óptimo-de-clústeres-k" id="toc-determinación-del-número-óptimo-de-clústeres-k" class="nav-link" data-scroll-target="#determinación-del-número-óptimo-de-clústeres-k">4. Determinación del Número Óptimo de Clústeres (<span class="math inline">\(K\)</span>)</a>
+  <ul class="collapse">
+  <li><a href="#cálculo-de-la-matriz-de-distancias" id="toc-cálculo-de-la-matriz-de-distancias" class="nav-link" data-scroll-target="#cálculo-de-la-matriz-de-distancias">4.1. Cálculo de la Matriz de Distancias</a></li>
+  <li><a href="#análisis-del-coeficiente-de-silueta" id="toc-análisis-del-coeficiente-de-silueta" class="nav-link" data-scroll-target="#análisis-del-coeficiente-de-silueta">4.2. Análisis del Coeficiente de Silueta</a></li>
+  </ul></li>
+  <li><a href="#entrenamiento-y-visualización-dimensional" id="toc-entrenamiento-y-visualización-dimensional" class="nav-link" data-scroll-target="#entrenamiento-y-visualización-dimensional">5. Entrenamiento y Visualización Dimensional</a>
+  <ul class="collapse">
+  <li><a href="#ejecución-del-algoritmo-pam" id="toc-ejecución-del-algoritmo-pam" class="nav-link" data-scroll-target="#ejecución-del-algoritmo-pam">5.1. Ejecución del Algoritmo PAM</a></li>
+  <li><a href="#proyección-dimensional-t-sne" id="toc-proyección-dimensional-t-sne" class="nav-link" data-scroll-target="#proyección-dimensional-t-sne">5.2. Proyección Dimensional (t-SNE)</a></li>
+  </ul></li>
+  <li><a href="#interpretación-y-visualización-de-los-perfiles-de-riesgo" id="toc-interpretación-y-visualización-de-los-perfiles-de-riesgo" class="nav-link" data-scroll-target="#interpretación-y-visualización-de-los-perfiles-de-riesgo">6. Interpretación y Visualización de los Perfiles de Riesgo</a>
+  <ul class="collapse">
+  <li><a href="#visualización-de-perfiles-dispersión-cruzada" id="toc-visualización-de-perfiles-dispersión-cruzada" class="nav-link" data-scroll-target="#visualización-de-perfiles-dispersión-cruzada">6.1. Visualización de perfiles: Dispersión Cruzada</a></li>
+  <li><a href="#visualización-de-perfiles-gráficos-de-barras-agrupadas" id="toc-visualización-de-perfiles-gráficos-de-barras-agrupadas" class="nav-link" data-scroll-target="#visualización-de-perfiles-gráficos-de-barras-agrupadas">6.2. Visualización de perfiles: Gráficos de Barras Agrupadas</a></li>
+  <li><a href="#revelación-de-medoides" id="toc-revelación-de-medoides" class="nav-link" data-scroll-target="#revelación-de-medoides">6.3. Revelación de Medoides</a>
+  <ul class="collapse">
+  <li><a href="#conclusión" id="toc-conclusión" class="nav-link" data-scroll-target="#conclusión">Conclusión</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">1. Definición del Problema y Enfoque Analítico</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Habiendo concluido exitosamente la fase de modelado supervisado, donde entrenamos una Red Neuronal Multicapa capaz de anticipar la probabilidad de deterioro de un crédito, en este notebook cambiaremos nuestro paradigma analítico. Abordaremos el aprendizaje no supervisado mediante técnicas de agrupamiento (<em>Clustering</em>).</p>
+<p>En el contexto del riesgo crediticio, el aprendizaje no supervisado no busca predecir una etiqueta o variable objetivo conocida, sino descubrir la estructura intrínseca y los patrones ocultos que residen de forma natural en los datos. Sin embargo, aplicar un algoritmo de agrupamiento sobre el millón de registros de nuestra cartera total representaría un esfuerzo computacional ineficiente y con poco valor de negocio. Matemáticamente, debido a nuestro fuerte desbalance de clases, el algoritmo probablemente se limitaría a recrear la frontera entre clientes “sanos” y “riesgosos” (algo que ya hace nuestra normativa NIFBdM C-16) o, en el peor de los casos, sus centroides serían absorbidos por el 81% de los créditos correspondientes a la Etapa 1.</p>
+<section id="enfoque-estratégico-perfiles-de-morosidad" class="level2">
+<h2 class="anchored" data-anchor-id="enfoque-estratégico-perfiles-de-morosidad">1.1. Enfoque estratégico: Perfiles de Morosidad</h2>
+<p>Para que este análisis complemente e integre nuestros hallazgos predictivos, tomaremos una decisión de diseño: aislaremos y analizaremos exclusivamente a la <strong>Cartera Vencida (Etapa 3)</strong>.</p>
+<p>Nuestra hipótesis analítica es que el incumplimiento hipotecario no es un comportamiento aislado. Los acreditados caen en impago por diferentes conjuntos de razones demográficas, socioeconómicas y estructurales del crédito. Al agrupar únicamente a los cohortes que ya han materializado el riesgo (Etapa 3), obligaremos al algoritmo a responder una pregunta valiosa para el negocio: <strong>¿Cuáles son los distintos perfiles de clientes que caen en mora (cartera vencida o riesgo de crédito alto)?</strong></p>
+<p>Descubrir estos grupos ocultos (por ejemplo, diferenciar entre un “Acreditado joven sobreendeudado por créditos” y un “Acreditado adulto mayor con propiedades residenciales de alto valor”) le permite a la institución financiera tomar decisiones estratégicas avanzadas, como diseñar campañas de cobranza especializadas, ofrecer planes de reestructuración de deuda a la medida del perfil, o endurecer los filtros de aprobación específicos para los nichos más vulnerables.</p>
+<p>Para lograr este objetivo, nos enfrentaremos a un desafío técnico particular: nuestro vector de características es mixta: contiene variables numéricas continuas (como el saldo insoluto) con variables categóricas nominales y ordinales. En los siguientes capítulos, estableceremos una estrategia rigurosa de submuestreo, eligiendo métricas de distancia especializadas y algoritmos robustos ante valores atípicos que nos permitan medir con fidelidad la similitud entre estos créditos deteriorados.</p>
+</section>
+<section id="selección-y-preprocesamiento-de-datos" class="level1">
+<h1>2. Selección y Preprocesamiento de Datos</h1>
+<p>Para garantizar el éxito de nuestro análisis de agrupamiento, debemos preparar el entorno de datos. A diferencia de los modelos supervisados, donde las transformaciones buscan optimizar el cálculo de gradientes y prevenir el sobreajuste, en el aprendizaje no supervisado el objetivo del preprocesamiento es asegurar que el cálculo de similitudes (distancias) entre dos observaciones sea matemáticamente adecuado.</p>
+<section id="filtrado-y-muestreo-aleatorio" class="level2">
+<h2 class="anchored" data-anchor-id="filtrado-y-muestreo-aleatorio">2.1. Filtrado y Muestreo Aleatorio</h2>
+<p>De acuerdo con nuestra definición del problema, el primer paso es filtrar nuestro dataset original para conservar únicamente los cohortes clasificados en la Etapa 3. En nuestra muestra de un millón de registros, esto nos deja con aproximadamente 80,000 observaciones de cartera vencida.</p>
+<p>Aunque 80,000 registros es un volumen excelente para entrenar redes neuronales, representa un obstáculo técnico para los algoritmos de agrupamiento basados en medoides. El algoritmo PAM (Partitioning Around Medoids) requiere la construcción de una matriz de distancias que cruza a todos los individuos contra todos. Para 80,000 créditos, esto implica calcular más de 3,200 millones de distancias cruzadas, requiriendo un alto costo de memoria RAM para alojar la matriz.</p>
+<p>Para resolver esto, extraeremos una muestra aleatoria representativa de 10,000 registros. Dado que ya hemos aislado una población homogénea en términos de nivel de riesgo (todos son Etapa 3), un muestreo aleatorio simple es suficiente para capturar la varianza de los perfiles de incumplimiento.</p>
+</section>
+<section id="selección-de-variables" class="level2">
+<h2 class="anchored" data-anchor-id="selección-de-variables">2.2. Selección de Variables</h2>
+<p>El agrupamiento es altamente sensible al “ruido” y a la maldición de la dimensionalidad. Incluir variables irrelevantes o constantes diluye la noción de distancia, haciendo que todos los clientes parezcan equidistantes. Por ello, eliminaremos la variable <code>etapa</code>, que ahora se convierto una constante (ya que solo nos centramos en los valores de Etapa 3) y conservaremos las 9 dimensiones restantes de nuestro EDA.</p>
+<p>Estas dimensiones nos permitirán construir los perfiles de morosidad: * <strong>Variables demográficas:</strong> <code>intervalo_edades</code>, <code>intervalo_ingreso_acreditado</code>, <code>sector_laboral</code>. * <strong>Variables del producto:</strong> <code>estado</code>, <code>destino_credito</code>, <code>segmento_vivienda</code>, <code>moneda</code>. * <strong>Variables financieras:</strong> <code>saldo_insoluto_final_periodo</code>, <code>tasa_ponderada</code>.</p>
+</section>
+<section id="tratamiento-de-datos-mixtos" class="level2">
+<h2 class="anchored" data-anchor-id="tratamiento-de-datos-mixtos">2.3. Tratamiento de Datos Mixtos</h2>
+<p>Para el cálculo de distancias necesario para el agrupamiento, la decisión de utilizar la <strong>Distancia de Gower</strong>. Esta métrica está diseñada matemáticamente para calcular la similitud en conjuntos de datos mixtos de forma nativa. Para las variables cuantitativas (saldo y tasa), Gower calcula la diferencia absoluta estandarizada por el rango de la variable. Para las categóricas, aplica un coeficiente de coincidencia simple (1 si son iguales, 0 si son diferentes).</p>
+<p>Por lo tanto, la única transformación necesaria en este punto será asegurar que nuestra estructura de datos (DataFrame) asigne el tipo de dato correcto a cada columna: variables numéricas puras como punto flotante (<code>float64</code>) y variables cualitativas como categorías (<code>category</code>).</p>
+<div id="0151fdff" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"SELECCIÓN Y PREPARACIÓN DE DATOS PARA CLUSTERING"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Carga del dataset limpio proveniente del EDA</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>ruta_archivo <span class="op">=</span> <span class="st">'../data/Datos_Procesados/dataset_hipotecario_limpio.csv'</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(ruta_archivo)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Filtrado: Aislamiento exclusivo de la Cartera Vencida (Etapa 3)</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>df_etapa3 <span class="op">=</span> df[df[<span class="st">'etapa'</span>] <span class="op">==</span> <span class="st">'Etapa 3'</span>].copy()</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>total_etapa3 <span class="op">=</span> df_etapa3.shape[<span class="dv">0</span>]</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Total de registros en Etapa 3 identificados: </span><span class="sc">{</span>total_etapa3<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Muestreo representativo para viabilidad computacional (Matriz de Distancias)</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Utilizamos random_state para garantizar que la ejecución sea reproducible</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>MUESTRA_TAMANO <span class="op">=</span> <span class="dv">10000</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> total_etapa3 <span class="op">&gt;</span> MUESTRA_TAMANO:</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    df_muestra_cluster <span class="op">=</span> df_etapa3.sample(n<span class="op">=</span>MUESTRA_TAMANO, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    df_muestra_cluster <span class="op">=</span> df_etapa3</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Tamaño de la muestra extraída para PAM: </span><span class="sc">{</span>df_muestra_cluster<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">:,}</span><span class="ss"> registros</span><span class="ch">\n</span><span class="ss">"</span>)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Selección de Variables y Eliminación de constantes</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="co"># La columna 'etapa' ya no aporta varianza, la eliminamos</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>df_muestra_cluster <span class="op">=</span> df_muestra_cluster.drop(columns<span class="op">=</span>[<span class="st">'etapa'</span>])</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Configuración de Tipos de Datos (Crucial para la métrica de Gower)</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>vars_numericas <span class="op">=</span> [<span class="st">'saldo_insoluto_final_periodo'</span>, <span class="st">'tasa_ponderada'</span>]</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>vars_categoricas <span class="op">=</span> [</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    <span class="st">'intervalo_edades'</span>, <span class="st">'intervalo_ingreso_acreditado'</span>, <span class="st">'sector_laboral'</span>, </span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    <span class="st">'estado'</span>, <span class="st">'destino_credito'</span>, <span class="st">'segmento_vivienda'</span>, <span class="st">'moneda'</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Forzamos los tipos correctos para evitar ambigüedades en el cálculo de distancias</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col <span class="kw">in</span> vars_numericas:</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    df_muestra_cluster[col] <span class="op">=</span> df_muestra_cluster[col].astype(<span class="st">'float64'</span>)</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col <span class="kw">in</span> vars_categoricas:</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>    df_muestra_cluster[col] <span class="op">=</span> df_muestra_cluster[col].astype(<span class="st">'category'</span>)</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"VISTA PREVIA DEL VECTOR DE CARACTERÍSTICAS MIXTO"</span>)</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_muestra_cluster.info())</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Primeras observaciones:"</span>)</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>display(df_muestra_cluster.head())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>============================================================
+SELECCIÓN Y PREPARACIÓN DE DATOS PARA CLUSTERING
+============================================================
+Total de registros en Etapa 3 identificados: 80,285
+Tamaño de la muestra extraída para PAM: 10,000 registros
+
+============================================================
+VISTA PREVIA DEL VECTOR DE CARACTERÍSTICAS MIXTO
+============================================================
+&lt;class 'pandas.DataFrame'&gt;
+Index: 10000 entries, 522057 to 221445
+Data columns (total 9 columns):
+ #   Column                        Non-Null Count  Dtype   
+---  ------                        --------------  -----   
+ 0   intervalo_edades              10000 non-null  category
+ 1   intervalo_ingreso_acreditado  10000 non-null  category
+ 2   sector_laboral                10000 non-null  category
+ 3   estado                        10000 non-null  category
+ 4   destino_credito               10000 non-null  category
+ 5   segmento_vivienda             10000 non-null  category
+ 6   moneda                        10000 non-null  category
+ 7   saldo_insoluto_final_periodo  10000 non-null  float64 
+ 8   tasa_ponderada                10000 non-null  float64 
+dtypes: category(7), float64(2)
+memory usage: 303.3 KB
+None
+
+Primeras observaciones:</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">intervalo_edades</th>
+<th data-quarto-table-cell-role="th">intervalo_ingreso_acreditado</th>
+<th data-quarto-table-cell-role="th">sector_laboral</th>
+<th data-quarto-table-cell-role="th">estado</th>
+<th data-quarto-table-cell-role="th">destino_credito</th>
+<th data-quarto-table-cell-role="th">segmento_vivienda</th>
+<th data-quarto-table-cell-role="th">moneda</th>
+<th data-quarto-table-cell-role="th">saldo_insoluto_final_periodo</th>
+<th data-quarto-table-cell-role="th">tasa_ponderada</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">522057</th>
+<td>46-55</td>
+<td>(40,001 - 80,000)</td>
+<td>Sector privado</td>
+<td>QUERÉTARO</td>
+<td>Pago de Pasivos Hipotecarios</td>
+<td>Media o Residencial</td>
+<td>Moneda Nacional (Pesos)</td>
+<td>591767.47</td>
+<td>13.00</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">279558</th>
+<td>36-45</td>
+<td>(20,001 - 40,000)</td>
+<td>Sector privado</td>
+<td>SAN LUIS POTOSÍ</td>
+<td>Adquisición de Vivienda Nueva</td>
+<td>Media o Residencial</td>
+<td>VSMG (Veces Salario Mínimo General)</td>
+<td>631273.22</td>
+<td>9.03</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">423861</th>
+<td>56-65</td>
+<td>(40,001 - 80,000)</td>
+<td>Sector privado</td>
+<td>CIUDAD DE MÉXICO</td>
+<td>Pago de Pasivos Hipotecarios</td>
+<td>Media o Residencial</td>
+<td>Moneda Nacional (Pesos)</td>
+<td>141285.32</td>
+<td>8.49</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">89496</th>
+<td>36-45</td>
+<td>Más de 150,000 MXN</td>
+<td>Sector público estatal</td>
+<td>JALISCO</td>
+<td>Adquisición de Vivienda Nueva</td>
+<td>Media o Residencial</td>
+<td>Moneda Nacional (Pesos)</td>
+<td>7193766.52</td>
+<td>10.60</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">464161</th>
+<td>36-45</td>
+<td>(20,001 - 40,000)</td>
+<td>Sector privado</td>
+<td>JALISCO</td>
+<td>Adquisición de Vivienda Nueva</td>
+<td>Media o Residencial</td>
+<td>Moneda Nacional (Pesos)</td>
+<td>17017319.85</td>
+<td>9.57</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="estrategia-de-agrupamiento-pam-y-distancia-de-gower" class="level1">
+<h1>3. Estrategia de Agrupamiento: PAM y Distancia de Gower</h1>
+<p>Una vez definida nuestra muestra de 10,000 registros de la cartera vencida, el siguiente paso es seleccionar la métrica matemática para evaluar la “similitud” entre los clientes y el algoritmo que utilizará dicha métrica para conformar los grupos. Una medida de distancia errónea puede invalidar los resultados del algoritmo.</p>
+<section id="justificación-de-la-métrica-distancia-de-gower" class="level2">
+<h2 class="anchored" data-anchor-id="justificación-de-la-métrica-distancia-de-gower">3.1. Justificación de la Métrica: Distancia de Gower</h2>
+<p>El estándar para medir similitud es la <strong>Distancia Euclidiana</strong>, definida como la longitud del segmento de recta que conecta dos puntos en un espacio Euclidiano: <span class="math display">\[d(p, q) = \sqrt{\sum_{i=1}^{n} (q_i - p_i)^2}\]</span></p>
+<p>Sin embargo, esta métrica asume estrictamente que todas las dimensiones son ortogonales y numéricas continuas. Nuestro vector de características es mixto. Como establecimos antes, para resolver este problema sin alterar la naturaleza de los datos, utilizaremos la <strong>Distancia de Gower</strong>. Esta métrica fue diseñada específicamente para calcular la proximidad en conjuntos de datos mixtos. Funciona calculando una similitud parcial para cada variable dependiendo de su tipo, y luego promediándolas.</p>
+<p>Matemáticamente, la similitud de Gower <span class="math inline">\(S_{ij}\)</span> entre dos observaciones <span class="math inline">\(i\)</span> y <span class="math inline">\(j\)</span> se define como: <span class="math display">\[S_{ij} = \frac{\sum_{k=1}^{p} w_{ijk} s_{ijk}}{\sum_{k=1}^{p} w_{ijk}}\]</span></p>
+<p>Donde para cada característica <span class="math inline">\(k\)</span>: * <strong>Si <span class="math inline">\(k\)</span> es cuantitativa (ej. <code>saldo_insoluto_final_periodo</code>):</strong> La similitud parcial es <span class="math inline">\(s_{ijk} = 1 - \frac{|x_{ik} - x_{jk}|}{R_k}\)</span>, siendo <span class="math inline">\(R_k\)</span> el rango máximo observado de esa variable. Esto estandariza automáticamente el efecto de los montos millonarios. * <strong>Si <span class="math inline">\(k\)</span> es cualitativa nominal (ej. <code>estado</code>, <code>destino_credito</code>):</strong> La similitud parcial es binaria: <span class="math inline">\(s_{ijk} = 1\)</span> si las categorías son idénticas, y <span class="math inline">\(s_{ijk} = 0\)</span> si son diferentes. * <span class="math inline">\(w_{ijk}\)</span> es un indicador de validez (usualmente 1, a menos que existan valores faltantes, en cuyo caso es 0).</p>
+<p>Finalmente, la distancia se obtiene restando la similitud a 1: <span class="math inline">\(d(i, j) = 1 - S_{ij}\)</span>. El resultado es una matriz donde cada valor está acotado estrictamente entre 0 (clientes idénticos) y 1 (clientes diametralmente opuestos), ofreciendo una representación geométrica perfecta de nuestra cartera.</p>
+</section>
+<section id="justificación-del-algoritmo-pam-k-medoids" class="level2">
+<h2 class="anchored" data-anchor-id="justificación-del-algoritmo-pam-k-medoids">3.2. Justificación del Algoritmo: PAM (K-Medoids)</h2>
+<p>Con la capacidad de calcular distancias precisas, requerimos un algoritmo de particionamiento. Revisamos las siguientes algoritmos:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Algoritmo</th>
+<th style="text-align: left;">Centro del Clúster</th>
+<th style="text-align: left;">Sensibilidad a Valores Atípicos</th>
+<th style="text-align: left;">Manejo de Datos Mixtos</th>
+<th style="text-align: left;">Interpretabilidad de Negocio</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>K-Means</strong></td>
+<td style="text-align: left;">Un centroide artificial (la media aritmética geométrica de los puntos).</td>
+<td style="text-align: left;"><strong>Alta.</strong> Al minimizar errores al cuadrado, los saldos anómalos arrastran el centroide.</td>
+<td style="text-align: left;">Deficiente. Un centroide puede promediar variables categóricas creando perfiles imposibles (ej. “Género 0.4”).</td>
+<td style="text-align: left;">Baja. El centro del clúster no existe en la realidad.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>DBSCAN</strong></td>
+<td style="text-align: left;">No utiliza centros, agrupa por densidad de puntos vecinos.</td>
+<td style="text-align: left;"><strong>Baja.</strong> Aísla los valores atípicos como ruido.</td>
+<td style="text-align: left;">Depende de la métrica de distancia utilizada.</td>
+<td style="text-align: left;">Muy Baja. En carteras de clientes suele agrupar a toda la clase media en un clúster amorfo gigante.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>PAM (K-Medoids)</strong></td>
+<td style="text-align: left;">Un medoide real (el cliente más céntrico del grupo).</td>
+<td style="text-align: left;"><strong>Muy Baja.</strong> Minimiza errores absolutos (no al cuadrado) y se basa en individuos reales.</td>
+<td style="text-align: left;">Excelente. Compatible nativamente con matrices precomputadas como la de Gower.</td>
+<td style="text-align: left;">Alta. Permite descubrir el perfil representativo apuntando a un expediente de cliente real.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión:</strong> Seleccionamos el algoritmo <strong>PAM (Partitioning Around Medoids)</strong>. A diferencia de K-Means, que intenta minimizar la suma de errores cuadráticos, PAM busca encontrar un conjunto de <span class="math inline">\(K\)</span> observaciones representativas (medoides) dentro del dataset, minimizando la suma de distancias absolutas a los puntos de su grupo.</p>
+<p>Esta decisión nos otorga dos ventajas para el sector financiero: 1. <strong>Robustez ante extremos:</strong> Como demostramos en la Sección 6 del EDA, nuestra base de datos posee valores atípicos reales y masivos en el monto y saldo de los créditos. PAM no eleva estas distancias al cuadrado, por lo que los créditos atípicos no distorsionan la estructura general del grupo. 2. <strong>Interpretabilidad total:</strong> El medoide resultante no será una abstracción matemática incomprensible; será una fila real de nuestro DataFrame. Podremos detectar claramente a los clientes en el centro del clúster: <em>“El clúster/perfil 1 de morosidad se comporta exactamente como este cliente real: 45 años, sector privado, en Jalisco, con deuda de $1.2M MXN”</em>.</p>
+<p>En el siguiente capítulo, calcularemos esta matriz de distancias y utilizaremos un criterio de validación interna para descubrir el número óptimo de estos perfiles (<span class="math inline">\(K\)</span>) presentes en la cartera vencida.</p>
+</section>
+</section>
+<section id="determinación-del-número-óptimo-de-clústeres-k" class="level1">
+<h1>4. Determinación del Número Óptimo de Clústeres (<span class="math inline">\(K\)</span>)</h1>
+<p>A diferencia de los modelos de clasificación supervisada donde conocemos las etiquetas a priori (las Etapas 1, 2 y 3), en el agrupamiento no supervisado desconocemos cuántos perfiles ocultos existen realmente en nuestra cartera vencida. Determinar el valor de <span class="math inline">\(K\)</span> (el número de grupos) es una de las decisiones más críticas: un <span class="math inline">\(K\)</span> muy bajo generaliza en exceso perdiendo matices importantes del riesgo, mientras que un <span class="math inline">\(K\)</span> muy alto fragmenta la cartera en grupos muy pequeños e inmanejables para las estrategias comerciales.</p>
+<section id="cálculo-de-la-matriz-de-distancias" class="level2">
+<h2 class="anchored" data-anchor-id="cálculo-de-la-matriz-de-distancias">4.1. Cálculo de la Matriz de Distancias</h2>
+<p>Antes de poder iterar y evaluar diferentes valores de <span class="math inline">\(K\)</span>, necesitamos construir el espacio métrico sobre el cual operará nuestro algoritmo. Como justificamos matemáticamente en la sección anterior, utilizaremos la métrica de Gower.</p>
+<p>El proceso computacional evaluará nuestros 10,000 registros, cruzando cada cliente contra el resto de la muestra para calcular su nivel de disimilitud basándose en las 9 variables de nuestro vector de características. El resultado será una matriz cuadrada simétrica de dimensiones <span class="math inline">\(10,000 \times 10,000\)</span>.</p>
+<p>En esta matriz bidimensional: * La diagonal principal estará compuesta estrictamente por ceros (la distancia de un cliente consigo mismo es nula). * Un valor cercano a <span class="math inline">\(0\)</span> indicará que dos créditos en mora comparten características demográficas, estructurales y financieras casi idénticas. * Un valor cercano a <span class="math inline">\(1\)</span> indicará que los perfiles son diametralmente opuestos (por ejemplo, un joven con un crédito de interés social vs.&nbsp;un adulto mayor con un crédito residencial de alto valor).</p>
+<p>Esta matriz precomputada actuará como el motor que alimentará de manera eficiente tanto a las métricas de validación interna (como el Coeficiente de Silueta) como al algoritmo de particionamiento (PAM) en las siguientes etapas.</p>
+<div id="a881507b" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> gower</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"CÁLCULO DE LA MATRIZ DE DISTANCIAS DE GOWER"</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>tiempo_inicio <span class="op">=</span> time.time()</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Calculando distancias (Esto puede tomar un par de minutos)..."</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Solución de compatibilidad: Creamos un mapa booleano de variables categóricas</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>columnas_df <span class="op">=</span> df_muestra_cluster.columns</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>es_categorica <span class="op">=</span> [col <span class="kw">in</span> vars_categoricas <span class="cf">for</span> col <span class="kw">in</span> columnas_df]</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Calculamos la matriz pasando el parámetro cat_features explícitamente</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>matriz_distancias <span class="op">=</span> gower.gower_matrix(df_muestra_cluster, cat_features<span class="op">=</span>es_categorica)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>tiempo_total <span class="op">=</span> time.time() <span class="op">-</span> tiempo_inicio</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">[ÉXITO] Matriz de distancias precomputada en </span><span class="sc">{</span>tiempo_total<span class="sc">:.2f}</span><span class="ss"> segundos."</span>)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Dimensiones de la matriz: </span><span class="sc">{</span>matriz_distancias<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">:,}</span><span class="ss"> x </span><span class="sc">{</span>matriz_distancias<span class="sc">.</span>shape[<span class="dv">1</span>]<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculamos la memoria que ocupa la matriz para confirmar viabilidad técnica</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>memoria_mb <span class="op">=</span> matriz_distancias.nbytes <span class="op">/</span> (<span class="dv">1024</span> <span class="op">*</span> <span class="dv">1024</span>)</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Consumo de memoria RAM de la matriz: </span><span class="sc">{</span>memoria_mb<span class="sc">:.2f}</span><span class="ss"> MB</span><span class="ch">\n</span><span class="ss">"</span>)</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Vista previa de la matriz de distancias (5x5 clientes):"</span>)</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Mostramos las primeras 5 filas y 5 columnas, redondeando a 4 decimales</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(np.<span class="bu">round</span>(matriz_distancias[:<span class="dv">5</span>, :<span class="dv">5</span>], <span class="dv">4</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>============================================================
+CÁLCULO DE LA MATRIZ DE DISTANCIAS DE GOWER
+============================================================
+Calculando distancias (Esto puede tomar un par de minutos)...
+
+[ÉXITO] Matriz de distancias precomputada en 52.97 segundos.
+Dimensiones de la matriz: 10,000 x 10,000
+Consumo de memoria RAM de la matriz: 381.47 MB
+
+Vista previa de la matriz de distancias (5x5 clientes):
+[[0.     0.574  0.2434 0.5712 0.4715]
+ [0.574  0.     0.5584 0.4562 0.2359]
+ [0.2434 0.5584 0.     0.5701 0.4609]
+ [0.5712 0.4562 0.5701 0.     0.2337]
+ [0.4715 0.2359 0.4609 0.2337 0.    ]]</code></pre>
+</div>
+</div>
+<p><strong>Interpretación</strong>: La ejecución fue exitosa y valida matemáticamente nuestra decisión de muestreo. Al calcular las distancias cruzadas para 10,000 registros, la matriz resultante ocupó aproximadamente 381 MB de memoria RAM. Además, la vista previa confirma que la Distancia de Gower está operando correctamente: la diagonal principal es estrictamente 0.0 (la distancia de un cliente consigo mismo), y las distancias cruzadas se mantienen estrictamente acotadas entre 0 y 1, reflejando el grado de similitud entre los perfiles de morosidad.</p>
+</section>
+<section id="análisis-del-coeficiente-de-silueta" class="level2">
+<h2 class="anchored" data-anchor-id="análisis-del-coeficiente-de-silueta">4.2. Análisis del Coeficiente de Silueta</h2>
+<p>Con nuestra matriz de distancias precomputada, el algoritmo PAM está listo para buscar los medoides óptimos. Sin embargo, antes de realizar la partición final, debemos determinar el hiperparámetro <span class="math inline">\(K\)</span> (el número de clústeres).</p>
+<p>A diferencia de K-Means, donde suele utilizarse el “Método del Codo” , este no es adecuado matemáticamente cuando utilizamos distancias no Euclidianas como Gower. Pero en su lugar, utilizaremos el <strong>Coeficiente de Silueta</strong> (Silhouette Score), una métrica de validación más robusta.</p>
+<p>El Coeficiente de Silueta evalúa simultáneamente dos propiedades fundamentales de un buen agrupamiento: 1. <strong>Cohesión (<span class="math inline">\(a\)</span>):</strong> Qué tan cerca está un cliente de los demás miembros de su <em>mismo</em> clúster. 2. <strong>Separación (<span class="math inline">\(b\)</span>):</strong> Qué tan lejos está un cliente de los miembros del clúster vecino más cercano.</p>
+<p>Para un cliente <span class="math inline">\(i\)</span>, su coeficiente se calcula como: <span class="math display">\[s(i) = \frac{b(i) - a(i)}{\max\{a(i), b(i)\}}\]</span></p>
+<p>El valor de <span class="math inline">\(s(i)\)</span> oscila entre -1 y 1. Un valor cercano a 1 indica que el cliente está perfectamente asignado a su clúster y muy lejos del clúster vecino; un valor de 0 indica que el cliente está justo en la frontera de decisión; y un valor negativo indica que fue asignado al clúster equivocado.</p>
+<p>Para evaluar el número óptimo de grupos, calcularemos el Coeficiente de Silueta promedio para toda la muestra iterando diferentes valores de <span class="math inline">\(K\)</span> (por ejemplo, desde <span class="math inline">\(K=2\)</span> hasta <span class="math inline">\(K=6\)</span>). Buscaremos el valor de <span class="math inline">\(K\)</span> que maximice este coeficiente, asegurándonos también de que el número de grupos tenga sentido estratégico para el negocio (usualmente entre 3 y 5 perfiles para que las áreas de cobranza o crédito puedan diseñar productos accionables).</p>
+<div id="e8826c2e" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn_extra.cluster <span class="im">import</span> KMedoids</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> silhouette_score</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"EVALUACIÓN DEL NÚMERO ÓPTIMO DE CLÚSTERES (K)"</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Rango de clústeres a evaluar</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>rango_k <span class="op">=</span> <span class="bu">range</span>(<span class="dv">2</span>, <span class="dv">7</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>valores_silueta <span class="op">=</span> []</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Calculando el Coeficiente de Silueta para distintos valores de K..."</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> rango_k:</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Instanciamos el modelo PAM (K-Medoids)</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Es vital indicarle metric='precomputed' para que no intente calcular distancias Euclidianas,</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># sino que entienda que le estamos pasando una matriz de distancias lista.</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    pam <span class="op">=</span> KMedoids(n_clusters<span class="op">=</span>k, metric<span class="op">=</span><span class="st">'precomputed'</span>, method<span class="op">=</span><span class="st">'pam'</span>, init<span class="op">=</span><span class="st">'heuristic'</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Ajustamos el modelo pasando nuestra matriz de Gower</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    etiquetas_k <span class="op">=</span> pam.fit_predict(matriz_distancias)</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculamos el promedio de la silueta utilizando también la matriz precomputada</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    silueta_promedio <span class="op">=</span> silhouette_score(matriz_distancias, etiquetas_k, metric<span class="op">=</span><span class="st">'precomputed'</span>)</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    valores_silueta.append(silueta_promedio)</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f" -&gt; Para K=</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">, el Coeficiente de Silueta es: </span><span class="sc">{</span>silueta_promedio<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualización de los resultados</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">5</span>))</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>sns.lineplot(x<span class="op">=</span><span class="bu">list</span>(rango_k), y<span class="op">=</span>valores_silueta, marker<span class="op">=</span><span class="st">'o'</span>, color<span class="op">=</span><span class="st">'#2c3e50'</span>, linewidth<span class="op">=</span><span class="fl">2.5</span>, markersize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Resaltamos el punto máximo</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>k_optimo <span class="op">=</span> rango_k[np.argmax(valores_silueta)]</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>max_silueta <span class="op">=</span> <span class="bu">max</span>(valores_silueta)</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>plt.scatter(k_optimo, max_silueta, color<span class="op">=</span><span class="st">'#e74c3c'</span>, s<span class="op">=</span><span class="dv">200</span>, zorder<span class="op">=</span><span class="dv">5</span>, label<span class="op">=</span><span class="ss">f'K Óptimo = </span><span class="sc">{</span>k_optimo<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Análisis de Silueta para PAM con Distancia de Gower'</span>, fontsize<span class="op">=</span><span class="dv">14</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>, pad<span class="op">=</span><span class="dv">15</span>)</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Número de Clústeres (K)'</span>, fontsize<span class="op">=</span><span class="dv">12</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Coeficiente de Silueta Promedio'</span>, fontsize<span class="op">=</span><span class="dv">12</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>plt.grid(axis<span class="op">=</span><span class="st">'both'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>plt.legend(fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>sns.despine()</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>============================================================
+EVALUACIÓN DEL NÚMERO ÓPTIMO DE CLÚSTERES (K)
+============================================================
+Calculando el Coeficiente de Silueta para distintos valores de K...
+ -&gt; Para K=2, el Coeficiente de Silueta es: 0.0905
+ -&gt; Para K=3, el Coeficiente de Silueta es: 0.0730
+ -&gt; Para K=4, el Coeficiente de Silueta es: 0.0643
+ -&gt; Para K=5, el Coeficiente de Silueta es: 0.0775
+ -&gt; Para K=6, el Coeficiente de Silueta es: 0.0796</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="modelo_no_supervisado_files/figure-html/cell-4-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Interpretación</strong>: Los resultados del Coeficiente de Silueta nos ofrecen una muestran un gráfico de la naturaleza de los datos financieros. Observamos que el valor máximo se alcanza en <span class="math inline">\(K=2\)</span> con un coeficiente de 0.0905, seguido de un repunte en <span class="math inline">\(K=5\)</span> y <span class="math inline">\(K=6\)</span>.</p>
+<p>Desde una perspectiva estrictamente matemática, los valores de la silueta (entre el 0.06 - 0.09) son bajos si los comparamos con datasets de prueba artificiales (donde se esperan valores <span class="math inline">\(&gt;0.5\)</span>). Un coeficiente cercano a cero indica que los clústeres son densos pero sus fronteras están superpuestas. Esto es un comportamiento normal y esperado en el el contexto de este dataset. Recordemos que el comportamiento de endeudamiento humano tiene factores estocásticos. No existe una frontera definida para los distintos perfiles; más aún, cuando se toman en consideración múltiples características (9 en partícular).</p>
+<p>De acuerdo a nuestro resultado, tomaremos <span class="math inline">\(K=2\)</span> como nuestro número óptimo de clústeres. Esto significa que nuestra cartera vencida se divide en dos grandes macro-perfiles de incumplimiento. Para fines prácticos de este proyecto, manejar dos perfiles altamente distintos parece una decisión adecuado y mucho más manejable que intentar perfilar seis agrupaciones con fronteras difusas.</p>
+</section>
+</section>
+<section id="entrenamiento-y-visualización-dimensional" class="level1">
+<h1>5. Entrenamiento y Visualización Dimensional</h1>
+<p>Con el número óptimo de clústeres definido (<span class="math inline">\(K=2\)</span>), procederemos a la fase de particionamiento definitivo y a la representación gráfica de nuestros hallazgos, cumpliendo con el objetivo de hacer que el modelo sea interpretable visualmente.</p>
+<section id="ejecución-del-algoritmo-pam" class="level2">
+<h2 class="anchored" data-anchor-id="ejecución-del-algoritmo-pam">5.1. Ejecución del Algoritmo PAM</h2>
+<p>Instanciaremos nuestro modelo <em>K-Medoids</em> configurado para encontrar 2 clústeres, alimentándolo nuevamente con nuestra matriz de distancias de Gower precomputada. Al finalizar el ajuste, el algoritmo asignará a cada uno de los 10,000 créditos de la muestra una etiqueta (Clúster 0 o Clúster 1).</p>
+<p>Una de las grandes ventajas de este enfoque es que el modelo nos devolverá los índices exactos de los dos clientes que fungen como “Medoides” (los representantes centrales de cada grupo), los cuales utilizaremos más adelante para perfilar la cartera.</p>
+</section>
+<section id="proyección-dimensional-t-sne" class="level2">
+<h2 class="anchored" data-anchor-id="proyección-dimensional-t-sne">5.2. Proyección Dimensional (t-SNE)</h2>
+<p>Nuestro vector de características actual tiene 9 dimensiones, lo cual es inviable de graficar y comprender visualmente. Necesitamos reducir esta dimensionalidad a un plano 2D (Eje X y Eje Y).</p>
+<p>Aunque el Análisis de Componentes Principales (PCA) es la técnica más común para este propósito, PCA asume relaciones lineales y requiere que los datos sean numéricos y continuos, lo cual invalida su uso directo sobre nuestras variables categóricas.</p>
+<p>En su lugar, utilizaremos <strong>t-SNE</strong> (T-distributed Stochastic Neighbor Embedding). Esta es una técnica avanzada de reducción de dimensionalidad no lineal. La ventaja fundamental de t-SNE para nuestro proyecto es que <strong>acepta matrices de distancias precomputadas</strong>. Es decir, le pasaremos directamente nuestra matriz de Gower, y t-SNE se encargará de proyectar esos 10,000 puntos en un plano bidimensional, intentando preservar fielmente las distancias locales relativas que calculamos. De este modo, si dos clientes tienen una distancia de Gower cercana a cero, t-SNE los dibujará juntos en el gráfico.</p>
+<div id="a0c1a831" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.manifold <span class="im">import</span> TSNE</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"1. ENTRENAMIENTO DEL MODELO PAM (K=2)"</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Definimos el K óptimo descubierto en el paso anterior</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>K_OPTIMO <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Instanciamos y entrenamos el modelo definitivo</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>modelo_pam_final <span class="op">=</span> KMedoids(n_clusters<span class="op">=</span>K_OPTIMO, metric<span class="op">=</span><span class="st">'precomputed'</span>, method<span class="op">=</span><span class="st">'pam'</span>, init<span class="op">=</span><span class="st">'heuristic'</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>etiquetas_cluster <span class="op">=</span> modelo_pam_final.fit_predict(matriz_distancias)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Agregamos las etiquetas al DataFrame original de la muestra</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>df_muestra_cluster[<span class="st">'Cluster_Asignado'</span>] <span class="op">=</span> etiquetas_cluster</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Obtenemos los índices de los clientes que representan el centro exacto de cada clúster</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>indices_medoides <span class="op">=</span> modelo_pam_final.medoid_indices_</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"[ÉXITO] Clústeres asignados. Los medoides representativos son los índices: </span><span class="sc">{</span>indices_medoides<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span>)</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"2. REDUCCIÓN DE DIMENSIONALIDAD (t-SNE)"</span>)</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Configuramos t-SNE para que acepte nuestra matriz de Gower precomputada</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="co"># perplexity=50 es un valor robusto para tamaños de muestra de 10,000</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>tsne <span class="op">=</span> TSNE(n_components<span class="op">=</span><span class="dv">2</span>, metric<span class="op">=</span><span class="st">'precomputed'</span>, perplexity<span class="op">=</span><span class="dv">50</span>, init<span class="op">=</span><span class="st">'random'</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Proyectando la matriz a 2 dimensiones (Esto tomará unos momentos)..."</span>)</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>proyeccion_2d <span class="op">=</span> tsne.fit_transform(matriz_distancias)</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Agregamos las coordenadas al DataFrame para graficarlas fácilmente</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>df_muestra_cluster[<span class="st">'tSNE_1'</span>] <span class="op">=</span> proyeccion_2d[:, <span class="dv">0</span>]</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>df_muestra_cluster[<span class="st">'tSNE_2'</span>] <span class="op">=</span> proyeccion_2d[:, <span class="dv">1</span>]</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"[ÉXITO] Proyección bidimensional completada.</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"3. VISUALIZACIÓN DE LOS PERFILES DE MOROSIDAD"</span>)</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">8</span>))</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Graficamos todos los puntos coloreados por su clúster</span></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="st">'tSNE_1'</span>, </span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="st">'tSNE_2'</span>, </span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>    hue<span class="op">=</span><span class="st">'Cluster_Asignado'</span>, </span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>    palette<span class="op">=</span>[<span class="st">'#3498db'</span>, <span class="st">'#e67e22'</span>], <span class="co"># Azul y Naranja</span></span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>df_muestra_cluster,</span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.6</span>,</span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>    s<span class="op">=</span><span class="dv">30</span>,</span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>    edgecolor<span class="op">=</span><span class="va">None</span></span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a><span class="co"># Resaltamos los medoides (centros) en la gráfica</span></span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a><span class="co"># Extraemos las coordenadas t-SNE de los índices que el modelo identificó como medoides</span></span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a>coords_medoides <span class="op">=</span> df_muestra_cluster.iloc[indices_medoides][[<span class="st">'tSNE_1'</span>, <span class="st">'tSNE_2'</span>]].values</span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a>plt.scatter(</span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>    coords_medoides[:, <span class="dv">0</span>], </span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a>    coords_medoides[:, <span class="dv">1</span>], </span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">'#e74c3c'</span>, <span class="co"># Rojo fuerte</span></span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a>    marker<span class="op">=</span><span class="st">'X'</span>, </span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>    s<span class="op">=</span><span class="dv">250</span>, </span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a>    edgecolor<span class="op">=</span><span class="st">'black'</span>,</span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a>    linewidth<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="st">'Medoides (Perfiles Centrales)'</span>,</span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a>    zorder<span class="op">=</span><span class="dv">10</span></span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-74"><a href="#cb7-74" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Proyección t-SNE de los Clústeres de Cartera Vencida (Etapa 3)'</span>, fontsize<span class="op">=</span><span class="dv">15</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>, pad<span class="op">=</span><span class="dv">15</span>)</span>
+<span id="cb7-75"><a href="#cb7-75" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Componente t-SNE 1 (Distancia Local Conservada)'</span>, fontsize<span class="op">=</span><span class="dv">12</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb7-76"><a href="#cb7-76" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Componente t-SNE 2 (Distancia Local Conservada)'</span>, fontsize<span class="op">=</span><span class="dv">12</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb7-77"><a href="#cb7-77" aria-hidden="true" tabindex="-1"></a>plt.legend(title<span class="op">=</span><span class="st">'Grupos de Morosidad'</span>, fontsize<span class="op">=</span><span class="dv">11</span>, title_fontsize<span class="op">=</span><span class="dv">12</span>, loc<span class="op">=</span><span class="st">'best'</span>)</span>
+<span id="cb7-78"><a href="#cb7-78" aria-hidden="true" tabindex="-1"></a>plt.grid(alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb7-79"><a href="#cb7-79" aria-hidden="true" tabindex="-1"></a>sns.despine()</span>
+<span id="cb7-80"><a href="#cb7-80" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb7-81"><a href="#cb7-81" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>============================================================
+1. ENTRENAMIENTO DEL MODELO PAM (K=2)
+============================================================
+[ÉXITO] Clústeres asignados. Los medoides representativos son los índices: [4103 9480]
+
+============================================================
+2. REDUCCIÓN DE DIMENSIONALIDAD (t-SNE)
+============================================================
+Proyectando la matriz a 2 dimensiones (Esto tomará unos momentos)...
+[ÉXITO] Proyección bidimensional completada.
+
+============================================================
+3. VISUALIZACIÓN DE LOS PERFILES DE MOROSIDAD
+============================================================</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="modelo_no_supervisado_files/figure-html/cell-5-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Lo que esta visualización nos confirma de la separación espacial. Podemos ver nubes de puntos (azul y naranja) que el algoritmo logró separar. Como era de esperarse en el modelado reducido a dos componentes (no interpretables), hay una frontera difusa donde los puntos se mezclan, sin embargo se destaca que los medoides están posicionados en un centro visual de densidad de cada grupo, confirmando a primera vista que con el algoritmo PAM, estos centros no fue arrastrados por valores atípicos.</p>
+</section>
+</section>
+<section id="interpretación-y-visualización-de-los-perfiles-de-riesgo" class="level1">
+<h1>6. Interpretación y Visualización de los Perfiles de Riesgo</h1>
+<p>La proyección t-SNE nos confirmó matemáticamente que existen dos grupos separados en nuestra cartera vencida. Sin embargo, para que este hallazgo tenga valor, se debemos traducir estos clústeres abstractos a perfiles humanos reales.</p>
+<p>Para lograrlo, cruzaremos las etiquetas que el modelo PAM asignó a cada crédito (<code>Cluster_Asignado</code>) con las variables crudas y originales de nuestro conjunto de datos.</p>
+<section id="visualización-de-perfiles-dispersión-cruzada" class="level2">
+<h2 class="anchored" data-anchor-id="visualización-de-perfiles-dispersión-cruzada">6.1. Visualización de perfiles: Dispersión Cruzada</h2>
+<p>Comenzaremos analizando la relación entre las dos variables demográficas más importantes: el <code>intervalo_edades</code> y el <code>intervalo_ingreso_acreditado</code>.</p>
+<p>Dado que ambas son variables ordinales discretas, intentar visualizarlas en un gráfico de dispersión tradicional provocaría un problema de superposición absoluta (<em>overplotting</em>): los 10,000 puntos colapsarían en unas cuantas coordenadas exactas de la cuadrícula, impidiendo ver la densidad de los clústeres.</p>
+<p>Para revelar la distribución real, utilizaremos un <strong>Gráfico de Dispersión con Jitter</strong> (<em>Stripplot</em>). Esta técnica inyecta una cantidad calculada de ruido estocástico (desplazamiento aleatorio microscópico) a las coordenadas de cada punto. Esto no altera el valor real de la variable, pero hace que los puntos “vibren” alrededor de su coordenada, formando “enjambres” que nos permiten apreciar el volumen de personas, la densidad de los grupos y cómo se distribuye el riesgo a lo largo de las distintas etapas de la vida y niveles de ingreso.</p>
+<div id="3d0d4bf2" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"RADIOGRAFÍA DEMOGRÁFICA: EDAD VS INGRESO POR CLÚSTER"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Definimos el orden lógico cronológico para las edades (para que el eje X tenga sentido temporal)</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>orden_edades <span class="op">=</span> [<span class="st">'Menor a 26'</span>, <span class="st">'26-35'</span>, <span class="st">'36-45'</span>, <span class="st">'46-55'</span>, <span class="st">'56-65'</span>, <span class="st">'Más de 65'</span>]</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">8</span>))</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Generamos el Stripplot (Dispersión con Jitter)</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>sns.stripplot(</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>df_muestra_cluster, </span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="st">'intervalo_edades'</span>, </span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="st">'intervalo_ingreso_acreditado'</span>, </span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    hue<span class="op">=</span><span class="st">'Cluster_Asignado'</span>,</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    palette<span class="op">=</span>[<span class="st">'#3498db'</span>, <span class="st">'#e67e22'</span>], <span class="co"># Azul y Naranja para mantener la consistencia</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    order<span class="op">=</span>orden_edades,</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    jitter<span class="op">=</span><span class="fl">0.35</span>, <span class="co"># Nivel de dispersión horizontal</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.5</span>,   <span class="co"># Transparencia para ver zonas de alta densidad</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    s<span class="op">=</span><span class="dv">4</span>        <span class="co"># Tamaño de los puntos</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Distribución de Clústeres de Morosidad por Edad e Ingreso'</span>, fontsize<span class="op">=</span><span class="dv">16</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>, pad<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Intervalo de Edades'</span>, fontsize<span class="op">=</span><span class="dv">12</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Intervalo de Ingreso Acreditado'</span>, fontsize<span class="op">=</span><span class="dv">12</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Ajustamos la leyenda</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>plt.legend(title<span class="op">=</span><span class="st">'Perfil de Morosidad (Clúster)'</span>, fontsize<span class="op">=</span><span class="dv">11</span>, title_fontsize<span class="op">=</span><span class="dv">12</span>, loc<span class="op">=</span><span class="st">'upper right'</span>, bbox_to_anchor<span class="op">=</span>(<span class="fl">1.25</span>, <span class="dv">1</span>))</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>plt.grid(axis<span class="op">=</span><span class="st">'y'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, alpha<span class="op">=</span><span class="fl">0.4</span>)</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>sns.despine()</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>============================================================
+RADIOGRAFÍA DEMOGRÁFICA: EDAD VS INGRESO POR CLÚSTER
+============================================================</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="modelo_no_supervisado_files/figure-html/cell-6-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Interpretación</strong>: Aunque el Stripplot cumple su función de mostrarnos que hay 10,000 observaciones ahí (y no solo 30 puntos apilados), visualmente sigue siendo poco interpretable. Sin embargo, si observamos de manera con cuidado podemos ver que los colores de cada clúster pueden agruparse en ciertas partes de la cuadricula, dandonos una idea inicial de los perfiles: * La Nube Azul (Clúster 0), se concentra fuertemente en el un vector de y “36-45” años, con ingresos que van desde “20,001 - 40,000” hasta “Más de 150,000”. * La Nube Naranja (Clúster 1), empieza a dominar conforme nos movemos hacia la derecha y hacia arriba. En particular para el sector de “46-55” y “56-65” años con ingresos de “1,000 - 10,000” y “10,001 y 20,000”.</p>
+<p>Para eliminar esta ambigüedad visual y convertir esta gráfica en algo más interpretable, pasaremos a otra herramienta estadística más útil para conteos categóricos: el Gráfico de Barras Agrupadas.</p>
+</section>
+<section id="visualización-de-perfiles-gráficos-de-barras-agrupadas" class="level2">
+<h2 class="anchored" data-anchor-id="visualización-de-perfiles-gráficos-de-barras-agrupadas">6.2. Visualización de perfiles: Gráficos de Barras Agrupadas</h2>
+<p>Aunque el gráfico de dispersión estocástica nos permitió intuir ciertas concentraciones, la toma de decisiones exige más precisión. Sabiendo que esta herramienta será la más interpretable, extenderemos su uso a todas las variables catégoricas.</p>
+<p>Para cuantificar exactamente cómo se distribuye la morosidad y perfilar de manera más acertada a nuestros dos grupos, desglosaremos las seis variables cualitativas principales de nuestro análisis, utilizando gráficos de barras agrupadas (<em>Countplots</em>). Esta visualización contará el número exacto de créditos vencidos que pertenecen a cada clúster según la dimensión demográfica (edad, ingreso, sector laboral) y la dimensión del producto (estado, destino del crédito, segmento de vivienda)., revelándonos de manera más explícita las fronteras demográficas de cada perfil.</p>
+<div id="68aa49f9" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"CUANTIFICACIÓN INTEGRAL: DEMOGRAFÍA Y PRODUCTO"</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Definimos el orden cronológico/jerárquico para las variables ordinales</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>orden_edades <span class="op">=</span> [<span class="st">'Menor a 26'</span>, <span class="st">'26-35'</span>, <span class="st">'36-45'</span>, <span class="st">'46-55'</span>, <span class="st">'56-65'</span>, <span class="st">'Más de 65'</span>]</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>orden_ingresos <span class="op">=</span> [</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Menos de 10,000 MXN'</span>, <span class="st">'(10,001 - 20,000)'</span>, <span class="st">'(20,001 - 40,000)'</span>, </span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'(40,001 - 80,000)'</span>, <span class="st">'(80,001 - 150,000)'</span>, <span class="st">'Más de 150,000 MXN'</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Preparamos la cuadrícula de 3 filas x 2 columnas</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">3</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">20</span>, <span class="dv">24</span>))</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>axes <span class="op">=</span> axes.flatten() <span class="co"># Aplanamos la matriz de ejes para iterar fácilmente</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Lista de configuración para cada variable: (columna, título, orden_personalizado)</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>variables_categoricas <span class="op">=</span> [</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'intervalo_edades'</span>, <span class="st">'Distribución por Edad'</span>, orden_edades),</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'intervalo_ingreso_acreditado'</span>, <span class="st">'Distribución por Ingreso'</span>, orden_ingresos),</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'sector_laboral'</span>, <span class="st">'Distribución por Sector Laboral'</span>, <span class="va">None</span>),</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'destino_credito'</span>, <span class="st">'Distribución por Destino del Crédito'</span>, <span class="va">None</span>),</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'segmento_vivienda'</span>, <span class="st">'Distribución por Segmento de Vivienda'</span>, <span class="va">None</span>),</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'estado'</span>, <span class="st">'Distribución por Estado (Entidad)'</span>, <span class="va">None</span>)</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Generando panel de visualización..."</span>)</span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Iteramos y graficamos</span></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, (var, titulo, orden) <span class="kw">in</span> <span class="bu">enumerate</span>(variables_categoricas):</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Si la variable es nominal (orden = None), ordenamos por frecuencia descendente</span></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> orden <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>        orden <span class="op">=</span> df_muestra_cluster[var].value_counts().index</span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>    sns.countplot(</span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>        data<span class="op">=</span>df_muestra_cluster,</span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>        x<span class="op">=</span>var,</span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>        hue<span class="op">=</span><span class="st">'Cluster_Asignado'</span>,</span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>        palette<span class="op">=</span>[<span class="st">'#3498db'</span>, <span class="st">'#e67e22'</span>],</span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>        order<span class="op">=</span>orden,</span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>        ax<span class="op">=</span>axes[i],</span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>        edgecolor<span class="op">=</span><span class="st">'black'</span>,</span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>        alpha<span class="op">=</span><span class="fl">0.9</span></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Formato y estética de cada subgráfico</span></span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>    axes[i].set_title(titulo, fontsize<span class="op">=</span><span class="dv">15</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>, pad<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>    axes[i].set_xlabel(<span class="st">''</span>)</span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>    axes[i].set_ylabel(<span class="st">'Número de Créditos en Mora'</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a>    axes[i].legend(title<span class="op">=</span><span class="st">'Clúster'</span>, loc<span class="op">=</span><span class="st">'upper right'</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a>    axes[i].grid(axis<span class="op">=</span><span class="st">'y'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, alpha<span class="op">=</span><span class="fl">0.4</span>)</span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Rotamos las etiquetas del eje X. Para 'estado' usamos 90 grados por la cantidad de categorías.</span></span>
+<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a>    rotacion <span class="op">=</span> <span class="dv">90</span> <span class="cf">if</span> var <span class="op">==</span> <span class="st">'estado'</span> <span class="cf">else</span> <span class="dv">45</span></span>
+<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a>    alineacion <span class="op">=</span> <span class="st">'center'</span> <span class="cf">if</span> var <span class="op">==</span> <span class="st">'estado'</span> <span class="cf">else</span> <span class="st">'right'</span></span>
+<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> tick <span class="kw">in</span> axes[i].get_xticklabels():</span>
+<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a>        tick.set_rotation(rotacion)</span>
+<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a>        tick.set_ha(alineacion)</span>
+<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a>sns.despine()</span>
+<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>============================================================
+CUANTIFICACIÓN INTEGRAL: DEMOGRAFÍA Y PRODUCTO
+============================================================
+Generando panel de visualización...</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="modelo_no_supervisado_files/figure-html/cell-7-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Interpretación</strong>: Nuestros gráficos de barras nos han permitido descartar variables de que causan ruido (como el Sector Laboral o el Segmento de Vivienda, dominados por las clases mayoritarias del portafolio del banco) y nos han revelado dos arquetipos preliminares de morosidad claramente diferenciados:</p>
+<ul>
+<li><strong>Perfil 0:</strong> Acreditados relativamente jóvenes (36-45 años), con ingresos medios-altos ($20,000 - $40,000 MXN), que adquieren vivienda nueva predominantemente en la periferia en crecimiento (Estado de México).</li>
+<li><strong>Perfil 1:</strong> Acreditados maduros (46-55 años), con ingresos más bajos ($10,000 - $20,000 MXN), que adquieren vivienda usada en el núcleo urbano consolidado (Ciudad de México).</li>
+</ul>
+</section>
+<section id="revelación-de-medoides" class="level2">
+<h2 class="anchored" data-anchor-id="revelación-de-medoides">6.3. Revelación de Medoides</h2>
+<p>Para completar estos perfiles, nos falta analizar las (<code>saldo_insoluto_final_periodo</code> y <code>tasa_ponderada</code>) dimensiones financieras y revelar la identidad completa del coherte/clientes. Además, gracias a nuestra elección matemática del algoritmo PAM (K-Medoids), extraeremos de la base de datos los registros exactos de los dos clientes que fungen como el centroide real de cada grupo. Esto nos proporcionara el perfil completo de los cohertes morosos, permitiendo a las instituciones de crédito auditar casos concretos.</p>
+<div id="95d37f2d" class="cell" data-execution_count="19">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"AUDITORÍA DE NEGOCIO: LOS MEDOIDES (CLIENTES REALES)"</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Extraemos las filas exactas de los clientes representativos usando los índices de PAM</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>medoides_df <span class="op">=</span> df_muestra_cluster.iloc[indices_medoides].copy()</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Ordenamos las columnas para mostrar primero las demográficas y luego las financieras</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>columnas_medoides <span class="op">=</span> [</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Cluster_Asignado'</span>, <span class="st">'intervalo_edades'</span>, <span class="st">'intervalo_ingreso_acreditado'</span>, </span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">'estado'</span>, <span class="st">'destino_credito'</span>, <span class="st">'saldo_insoluto_final_periodo'</span>, <span class="st">'tasa_ponderada'</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Formateamos el saldo para que sea legible (con comas y decimales)</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>medoides_df[<span class="st">'saldo_insoluto_final_periodo'</span>] <span class="op">=</span> medoides_df[<span class="st">'saldo_insoluto_final_periodo'</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: <span class="ss">f"$</span><span class="sc">{</span>x<span class="sc">:,.2f}</span><span class="ss">"</span>)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>display(medoides_df[columnas_medoides])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>============================================================
+AUDITORÍA DE NEGOCIO: LOS MEDOIDES (CLIENTES REALES)
+============================================================</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Cluster_Asignado</th>
+<th data-quarto-table-cell-role="th">intervalo_edades</th>
+<th data-quarto-table-cell-role="th">intervalo_ingreso_acreditado</th>
+<th data-quarto-table-cell-role="th">estado</th>
+<th data-quarto-table-cell-role="th">destino_credito</th>
+<th data-quarto-table-cell-role="th">saldo_insoluto_final_periodo</th>
+<th data-quarto-table-cell-role="th">tasa_ponderada</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">402380</th>
+<td>0</td>
+<td>36-45</td>
+<td>(20,001 - 40,000)</td>
+<td>MÉXICO</td>
+<td>Adquisición de Vivienda Nueva</td>
+<td>$754,566.50</td>
+<td>10.75</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">768867</th>
+<td>1</td>
+<td>46-55</td>
+<td>(10,001 - 20,000)</td>
+<td>CIUDAD DE MÉXICO</td>
+<td>Adquisición de Vivienda Usada</td>
+<td>$1,338,840.80</td>
+<td>10.00</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<section id="conclusión" class="level3">
+<h3 class="anchored" data-anchor-id="conclusión">Conclusión</h3>
+<p>El modelo no supervisado ha cumplido con el objetivo de enriquecer nuestro entendimiento de la cartera vencida. Mientras que nuestra Red Neuronal (modelo supervisado) actúa como un predictor para alertarnos quién tiene una alta probabilidad de caer en un perfil de riesgo crediticio alto, este modelo de clustering nos dota de las caracterísicas que tienen estos grupos morosos. Al comprender que no todos los morosos son iguales, las instituciones pueden dejar de aplicar estrategias de cobranza genéricas y transicionar hacia soluciones focalizadas: por ejemplo pudiendo ofrecer reestructuraciones especificas para cada perfil, o implementar filtros más estrictos para futuros prospectos que comparten estos mismos arquetipos.</p>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

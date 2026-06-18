@@ -1,0 +1,23 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "Riesgo Crediticio - Minería de Datos"
+  description: "Análisis y modelado del portafolio hipotecario"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Inicio
+      - href: notebooks/EDA.ipynb
+        text: Análisis Exploratorio de Datos
+      - href: notebooks/modelo_supervisado.ipynb
+        text: Modelo Supervisado
+      - href: notebooks/modelo_no_supervisado.ipynb
+        text: Clustering
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    code-fold: true
