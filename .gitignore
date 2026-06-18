@@ -16,6 +16,21 @@ env/
 # Caché de Jupyter Notebooks
 .ipynb_checkpoints/
 
-# 4. Artefactos del Sistema Operativo
+# Artefactos del Sistema Operativo
 .DS_Store
 Thumbs.db
+
+# Compilación Latex
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.blg
+*.bbl
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.run.xml
+*.bcf

@@ -19,7 +19,7 @@ def mostrar_resultados_evaluacion(y_real, y_prediccion):
     reporte = classification_report(
         y_real, 
         y_prediccion, 
-        target_names=['Sano (Etapa 1)', 'Mora (Etapa 3)']
+        target_names=['Riesgo bajo (Etapa 1)', 'Alto (Etapa 3)']
     )
     print(reporte)
     

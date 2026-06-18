@@ -1,0 +1,32 @@
+\section{Reutilización del modelo}
+
+% Un proyecto analítico carece de valor operativo si los modelos matemáticos no pueden ser desplegados en un entorno de producción de manera independiente a su entorno de entrenamiento. Una métrica fundamental de éxito en las arquitecturas de \textit{Machine Learning} (\textit{MLOps}) es la capacidad de aislar la fase de aprendizaje —que conlleva un alto costo computacional— de la fase de inferencia, la cual debe ser inmediata y reproducible.
+
+Para demostrar la viabilidad operativa del sistema, se implementó un flujo de persistencia y reutilización que permite evaluar nuevas cohortes sin requerir un reentrenamiento de los algoritmos.
+
+\subsection{Generación y persistencia de los artefactos}
+Al finalizar la fase del entrenamiento, el controlador principal genera y almacena en el disco tres artefactos, cada uno con una función específica para la evaluación futura:
+
+\begin{enumerate}
+	\item \textbf{Tubería de Preprocesamiento (\texttt{pipeline\_preprocesamiento.joblib}):} \\
+	A través de la librería \textit{Joblib}, se serializa el estado interno del \textit{RobustScaler} y del \textit{One-Hot Encoder}. Esto garantiza que, al evaluar una nueva cohorte en el futuro, sus montos monetarios se estandaricen restando exactamente las mismas medianas y dividiendo por los mismos rangos intercuartílicos que se aprendieron de la base histórica. Este paso es imprescindible para garantizar consistencia en la medida de nuevos datos.
+	
+	\item \textbf{Pesos de la Red Neuronal (\texttt{modelo\_red\_neuronal.pth}):} \\
+	En lugar serializar el objeto completo, el modelo supervisado guarda exclusivamente su \textit{State Dictionary} (diccionario de estados) nativo de PyTorch. Este archivo binario contiene los tensores óptimos de pesos y sesgos encontrados tras la convergencia del algoritmo de optimización. Para la reutilización, el sistema simplemente reconstruye la arquitectura del Perceptrón Multicapa en memoria e inyecta estos pesos, permitiendo que la red realice unicamente las propagaciones hacia adelante (\textit{Feed-Forward}) de manera rápida para clasificar el nivel de riesgo.
+	
+	\item \textbf{Matriz Histórica de Medoides (\texttt{modelo\_pam\_clustering.joblib}):} \\
+	El modelo descriptivo serializa tanto el algoritmo de particionamiento como la matriz de distancias de la cartera deteriorada. Por lo que, para la evaluación de una nueva cohorte se calcula su Distancia de Gower contra las observaciones de referencia para dictaminar a qué perfil de riesgo se asemeja más.
+\end{enumerate}
+
+\subsection{Demostración de los modelos}
+La capacidad de reutilización se demuestra de manera práctica mediante la construcción de un simulador (\texttt{demo.py}). Esta interfaz actúa como el entorno de producción básico para el análisis dentro de una institución financiera.
+
+El flujo operativo de evaluación se ejecuta de la siguiente manera:
+\begin{itemize}
+	\item \textbf{Ingesta de Datos:} El sistema captura los atributos socioeconómicos y estructurales de una nueva cohorte hipotética (por ejemplo, ingresos, sector laboral, destino del crédito y saldos insolutos) a través de menús estandarizados con los catálogos de la CNBV.
+	\item \textbf{Transformación:} Se invoca el artefacto de la tubería preentrenada utilizando exclusivamente el método \texttt{transform()}, asegurando que la nueva observación se acople al espacio vectorial sin alterar los parámetros estadísticos del modelo original.
+	\item \textbf{Evaluación Predictiva:} La red neuronal procesa el vector transformado y emite un dictamen. Si la predicción arroja un resultado de \textbf{Riesgo Bajo (Etapa 1)}, el sistema concluye la evaluación.
+	\item \textbf{Diagnóstico Descriptivo:} Si la red neuronal clasifica a la cohorte dentro de las categorías de \textbf{Riesgo Significativo o Deterioro (Etapas 2 o 3)}, el sistema alerta al usuario y canaliza los datos crudos hacia el modelo de agrupamiento. El algoritmo PAM calcula la Distancia de Gower de esta nueva cohorte frente a los medoides históricos y dictamina a cuál de los dos perfiles de morosidad pertenece (Perfil 0 o 1).
+\end{itemize}
+
+A través de este flujo, se verifica exitosamente que los modelos poseen la robustez necesaria para interactuar en un entorno de producción.

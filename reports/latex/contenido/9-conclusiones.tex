@@ -1,0 +1,42 @@
+\section{Conclusiones y Trabajo Futuro}
+
+La presente investigación aplicó un marco riguroso de Minería de Datos para estudiar y predecir el comportamiento del portafolio hipotecario mexicano. La transición desde el análisis exploratorio hasta la consolidación de un entorno de inferencia dinámico arrojó conocimientos profundos sobre la anatomía del riesgo crediticio.
+
+\subsection{Hallazgos Principales}
+
+A lo largo de las fases metodológicas, se identificaron diez hallazgos críticos que redefinen la comprensión del deterioro en los instrumentos financieros:
+
+\begin{enumerate}
+	\item \textbf{Granularidad y naturaleza del riesgo:} El análisis reveló que el portafolio no se evalúa a nivel de individuo, sino mediante \textit{cohortes}. Esta agregación institucional implica que el riesgo debe modelarse como una probabilidad de grupo, donde las variables monetarias fungen como exposición total (\textit{Exposure at Default}) y no como deudas aisladas, condicionando el enfoque del modelado.
+	
+	\item \textbf{Desbalance de clases:} La exploración univariada cuantificó una asimetría pronunciada en el mercado: si bien el 81.09\% de la cartera mantiene un riesgo bajo (Etapa 1), existe un 18.91\% combinado en fases de deterioro (Etapas 2 y 3). Este desbalance de clases es un comportamiento esperado en instituciones bancarias y su modelo de negocio. Además con esta proporción, se establece que las métricas de exactitud (\textit{Accuracy}) son métricas insuficientes para evaluar la salud de las cartera, obligando a priorizar la sensibilidad o \textit{Recall}.
+	
+	\item \textbf{Importancia de las divisas de originación:} Se demostró estadísticamente que los instrumentos denominados en divisas variables (UDIS y VSMG) presentan tasas de deterioro (28.18\% y 29.37\% respectivamente) muy por encima a los originados en Moneda Nacional (18.69\%). Esto representa la vulnerabilidad estructural de las cohortes ante esquemas de amortización distintos a la divisa principal del país.
+	
+	\item \textbf{El Sector Laboral como Eje de Solvencia:} La variable del sector de empleo demostró ser uno de los predictores de riesgo más robustos. Las cohortes asociadas al sector público estatal exhiben un bajo riesgo de incumplimiento (10.83\% de deterioro) en marcado contraste con el sector privado (21.83\%).
+	
+	\item \textbf{Valores Atípicos:} El descubrimiento de observaciones con montos que superan los cientos de millones de pesos demostró que, en el dominio financiero a escala nacional, los valores atípicos no son necesariamente ruido estadístico. Representan realidades comerciales masivas que exigen el uso de transformaciones matemáticas con escaladores robustos en lugar de técnicas de eliminación que destruirían la validez del modelo.
+	
+	\item \textbf{No Linealidad de la riqueza y el incumplimiento:} Contrario a la hipótesis de una relación inversa estricta, se descubrió que los estratos de ingresos medios-altos son los más estables, mientras que los niveles de mayor ingreso ("Más de \$150,000 MXN") y menor ingreso (10,001 - 20,000) encabezan las clases con mayor tasa de deterioro (aproximadamente 21\%). 
+	
+	\item \textbf{Colinealidad en las medidas monetarias:} Se comprobó una correlación casi perfecta ($|r| > 0.94$) entre los montos de originación, valores de vivienda y saldos insolutos. La eliminación sistemática de esta redundancia permitió construir un modelo de comportamiento (\textit{Behavioral Scoring}) eficiente, reteniendo exclusivamente el saldo insoluto actual y la tasa ponderada como métricas independientes.
+	
+	\item \textbf{Asimetría de Costos y Función de Pérdida:} Durante el modelado supervisado, se determinó que el costo institucional de un Falso Negativo (pérdida de capital) es muchísimo mayor al de un Falso Positivo. Esto justificó la integración de tensores de pesos en la función de pérdida del la red neuronal, forzandolo a penalizar con mayor severidad los errores sobre la clase minoritaria deteriorada.
+	
+	\item \textbf{Perfiles de morosidad:} El algoritmo no supervisado PAM, utilizando la Distancia de Gower, evidenció que la cartera vencida posee distintos perfiles de riesgo. Se descubrieron dos medoides distintos: el Perfil 0 (cohortes adultos, vivienda nueva, ingresos medios-altos, sobreendeudados) y el Perfil 1 (cohortes maduras, vivienda usada, menores ingresos, alto apalancamiento).
+	
+	\item \textbf{Arquitectura MLOps:} La implementación del patrón de diseño \textit{Strategy} y las tuberías de procesamiento (\textit{Pipelines}) probó que es posible abstraer la complejidad matemática del entrenamiento en un sistema de producción. El controlador de simulaciones demostró capacidad de inferencia inmediata al consumir artefactos serializados, eliminando la dependencia de reentrenamientos masivos y costosos.
+\end{enumerate}
+
+\subsection{Limitaciones del Análisis}
+El proyecto en su versión actual se encuentra sujeto a limitaciones a considerar:
+\begin{itemize}
+	\item \textbf{Pérdida de varianza ante el comportamiento humano individual:} Al operar sobre datos agregagados, el modelo asume que todos los individuos que componen una cohorte se comportan de manera idéntica. Esta estructura imposibilita la predicción de impagos atípicos aislados dentro de un grupo mayoritariamente estable.
+	\item \textbf{Carencia de contexto macroeconómico:} La base histórica se limita a variables internas propias de las instituciones financieras. La ausencia de indicadores externos por ejemplo inflación, tasa de desempleo, etc, restringe la capacidad actual de los modelos para actuar en un contexto macro económico.
+	\item \textbf{Consideraciones temporales:} Aunque se detectó una tendencia temporal de deterioro, el conjunto de datos representa observaciones transversales a lo largo de 25 meses, lo que podría invalidar el uso del estado actual de estos modelos y parámetros para evaluar cohertes fuera de estos periodos reportados.
+\end{itemize}
+
+\subsection{Conclusión Final}
+La evaluación del riesgo crediticio pasó de ser un simple ejercicio de exploración y estudio para transformarse en un sistema de inferencias útil y escalable para el análisis de riesgos, mediante la integración de modelos de aprendizaje como redes neuronales y algoritmos de clustering como PAM.
+
+El modelo supervisado logra alertar la cartera más propensa al deterioro, mientras que el modelo descriptivo descubrió la naturaleza estructural de dicho riesgo alto con perfiles de morosidad, revelando que el incumplimiento está fuertemente ligado a las características de los productos comerciales y monetarias, aunado a sus características demograficas y socioeconomicas. Más aún el valor del proyecto no se queda plasmado en la teoría, si no que también reside en un sistema básico (\textit{MLOps}), el cual consolida una herramienta validada, escalable y lista para ser integrada en entornos de producción real para el análisis financiero y la toma de decisiones.
