@@ -9,10 +9,6 @@ Almacenes y Minería de Datos
 
 * **Alumno:** Gustavo Alonso Domínguez Sánchez - 418047121
 
-* **Profesor:** Jessica Santizo Galicia
-* **Ayudante:** Diego Antonio Villalba González
-* **Ayudante Lab:** Ares Gael Castro Romero
-
 
 ## Descripción del Proyecto
 
