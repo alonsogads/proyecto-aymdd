@@ -2,8 +2,11 @@
 ## Tema: **Riesgo y Deterioro de la Cartera de la Vivienda**
 
 Universidad Nacional Autónoma de México
+
 Facultad de Ciencias
+
 Almacenes y Minería de Datos
+
 Gustavo Alonso Domínguez Sánchez - 418047121
 
 
