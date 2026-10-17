@@ -7,7 +7,7 @@ Facultad de Ciencias
 
 Almacenes y Minería de Datos
 
-Gustavo Alonso Domínguez Sánchez - 418047121
+Gustavo Alonso Domínguez Sánchez
 
 
 ## Descripción del Proyecto
