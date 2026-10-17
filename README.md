@@ -1,5 +1,5 @@
 # Proyecto Final: Minería de Datos aplicada a México
-Repositorio del Proyecto: **Riesgo y Deterioro de la Cartera de la Vivienda**
+## Tema: **Riesgo y Deterioro de la Cartera de la Vivienda**
 
 Universidad Nacional Autónoma de México
 
